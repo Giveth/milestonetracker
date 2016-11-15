@@ -4,7 +4,8 @@
 
 
 
-var vaultHelper = require('../js/vault_helper.js');
+var milestoneTrackerHelper = require('../js/milestonetracker_helper.js');
+var vaultHelper = require('vault');
 var ethConnector = require('ethconnector');
 var BigNumber = require('bignumber.js');
 
@@ -15,11 +16,9 @@ var _ = require('lodash');
 
 var verbose = true;
 
-
-
-describe('Normal Scenario Vault test', function(){
+describe('Normal Scenario Milestone test', function(){
     var vault;
-    var b = [];
+    var milestoneTracker;
     var owner;
     var hatchCaller;
     var hatchReceiver;
@@ -27,6 +26,9 @@ describe('Normal Scenario Vault test', function(){
     var spender;
     var recipient;
     var guest;
+    var arbitrator;
+    var donor;
+    var verifier;
 
     before(function(done) {
 //        ethConnector.init('rpc', function(err) {
@@ -39,10 +41,13 @@ describe('Normal Scenario Vault test', function(){
             spender = ethConnector.accounts[4];
             recipient = ethConnector.accounts[5];
             guest = ethConnector.accounts[6];
+            arbitrator = owner;
+            donor =ethConnector.accounts[7];
+            verifier = ethConnector[8];
             done();
         });
     });
-    it('should deploy all the contracts ', function(done){
+    it('should deploy vault contracts ', function(done){
         this.timeout(20000);
         var now = Math.floor(new Date().getTime() /1000);
 
@@ -59,7 +64,24 @@ describe('Normal Scenario Vault test', function(){
             done();
         });
     });
-    it('Should send some Ether to the Vault', function(done) {
+    it('should deploy milestoneTracker contracts ', function(done){
+        this.timeout(20000);
+        var now = Math.floor(new Date().getTime() /1000);
+
+        milestoneTrackerHelper.deploy({
+            arbitrator: arbitrator,
+            donor: donor,
+            verifier: verifier,
+            recipient: recipient,
+            vault: vault.address
+        }, function(err, _milestoneTracker) {
+            assert.ifError(err);
+            assert.ok(_milestoneTracker.address);
+            milestoneTracker = _milestoneTracker;
+            done();
+        });
+    });
+ /*   it('Should send some Ether to the Vault', function(done) {
         vault.receiveEther({
             from: ethConnector.accounts[0],
             value: ethConnector.web3.toWei(50)
@@ -294,7 +316,7 @@ describe('Normal Scenario Vault test', function(){
             }
         );
     });
-
+*/
     function bcDelay(secs, cb) {
         send("evm_increaseTime", [secs], function(err, result) {
             if (err) return cb(err);

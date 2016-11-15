@@ -7,26 +7,23 @@ contract Vault {
 contract MilestoneTracker {
     modifier onlyRecipient { if (msg.sender !=  recipient) throw; _; }
     modifier onlyArbitrator { if (msg.sender != arbitrator) throw; _; }
-    modifier onlyArbitratorOrDonor {
+    modifier onlyDonor { if (msg.sender != donor) throw; _; }
+    modifier onlyVerifier { if (msg.sender != verifier) throw; _; }
+
+    modifier onlyDonorOrRecipient {
         if ((msg.sender != recipient) &&
-            (msg.sender != donor) &&
-            (msg.sender != arbitrator))
+            (msg.sender != donor))
             throw;
         _;
     }
-    modifier onlyArbitratorOrDonorOrRecipient {
-        if ((msg.sender != recipient) &&
-            (msg.sender != donor) &&
-            (msg.sender != arbitrator))
-            throw;
-        _;
-    }
+
     modifier campaigNotCancelled {
         if (campaignCancelled) throw;
         _;
     }
 
     address public recipient;
+    address public verifier;
     address public donor;
     address public arbitrator;
     Vault public vault;
@@ -57,11 +54,17 @@ contract MilestoneTracker {
 // Constuctor
 ///////////
 
-    function Milestones(address _arbitrator, address _donor, address _recipient, address _vaultAddress ) {
+    function MilestoneTracker (
+        address _arbitrator,
+        address _donor,
+        address _verifier,
+        address _recipient,
+        address _vault
+    ) {
         arbitrator = _arbitrator;
         donor = _donor;
         recipient = _recipient;
-        vault = Vault(_vaultAddress);
+        vault = Vault(_vault);
     }
 
 
@@ -69,7 +72,7 @@ contract MilestoneTracker {
 // Helper functions
 /////////
 
-    function getNumberMilestones() constant returns (uint) {
+    function getNumberOfMilestones() constant returns (uint) {
         return milestones.length;
     }
 
@@ -83,15 +86,19 @@ contract MilestoneTracker {
         arbitrator = _newArbitrator;
     }
 
-    function changeDonor(address _newDonor) onlyArbitratorOrDonor {
+    function changeDonor(address _newDonor) onlyDonor {
         donor = _newDonor;
     }
 
-    function changeRecipient(address _newRecipient) onlyArbitratorOrDonorOrRecipient {
+    function changeRecipient(address _newRecipient) onlyRecipient {
         recipient = _newRecipient;
     }
 
-    function changeVault(address _newVaultAddr) onlyArbitrator {
+    function changeVerifier(address _newRecipient) onlyVerifier {
+        recipient = _newRecipient;
+    }
+
+    function changeVault(address _newVaultAddr) onlyDonor {
         vault = Vault(_newVaultAddr);
     }
 
@@ -124,7 +131,7 @@ contract MilestoneTracker {
         milestone.status = MilestoneStatus.PendingApproval;
     }
 
-    function approveNewMilestoneProposal(uint _idMilestone) onlyArbitratorOrDonor campaigNotCancelled {
+    function approveNewMilestoneProposal(uint _idMilestone) onlyDonor campaigNotCancelled {
         if (_idMilestone <= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         milestone.status = MilestoneStatus.NotDone;
@@ -132,14 +139,14 @@ contract MilestoneTracker {
 
 
 
-    function milestoneCompleted(uint _idMilestone) onlyArbitratorOrDonor campaigNotCancelled {
+    function milestoneCompleted(uint _idMilestone) onlyRecipient campaigNotCancelled {
         if (_idMilestone <= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         milestone.status = MilestoneStatus.Done;
     }
 
 
-    function approveMilestone(uint _idMilestone) onlyArbitratorOrDonor campaigNotCancelled {
+    function approveMilestone(uint _idMilestone) onlyVerifier campaigNotCancelled {
         if (_idMilestone <= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if (milestone.status != MilestoneStatus.Done) throw;
@@ -147,7 +154,7 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    function rejectMilestone(uint _idMilestone) onlyArbitratorOrDonor campaigNotCancelled {
+    function rejectMilestone(uint _idMilestone) onlyVerifier campaigNotCancelled {
         if (_idMilestone <= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if (milestone.status != MilestoneStatus.Done) throw;
@@ -165,7 +172,7 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    function cancelMilestone(uint _idMilestone) onlyArbitratorOrDonorOrRecipient campaigNotCancelled {
+    function cancelMilestone(uint _idMilestone) onlyRecipient campaigNotCancelled {
         if (_idMilestone <= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.PendingApproval) &&
