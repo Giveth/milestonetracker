@@ -4,9 +4,9 @@
 
 
 
-var milestoneTrackerHelper = require('../js/milestonetracker_helper.js');
-var vaultHelper = require('vault');
 var ethConnector = require('ethconnector');
+var milestoneTrackerHelper = require('../js/milestonetracker_helper.js');
+var vaultHelper = require('vaultcontract');
 var BigNumber = require('bignumber.js');
 
 
@@ -43,12 +43,12 @@ describe('Normal Scenario Milestone test', function(){
             guest = ethConnector.accounts[6];
             arbitrator = owner;
             donor =ethConnector.accounts[7];
-            verifier = ethConnector[8];
+            verifier = ethConnector.accounts[8];
             done();
         });
     });
     it('should deploy vault contracts ', function(done){
-        this.timeout(20000);
+        this.timeout(20000000);
         var now = Math.floor(new Date().getTime() /1000);
 
         vaultHelper.deploy({
@@ -65,7 +65,7 @@ describe('Normal Scenario Milestone test', function(){
         });
     });
     it('should deploy milestoneTracker contracts ', function(done){
-        this.timeout(20000);
+        this.timeout(20000000);
         var now = Math.floor(new Date().getTime() /1000);
 
         milestoneTrackerHelper.deploy({

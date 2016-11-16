@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/Giveth/milestonetracker",
   "dependencies": {
-    "ethconnector": "0.0.14"
+    "ethconnector": "0.0.17",
+    "vaultcontract": "0.0.5"
   }
 }

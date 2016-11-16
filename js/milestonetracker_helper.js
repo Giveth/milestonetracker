@@ -16,7 +16,7 @@ exports.deploy = function(opts, cb) {
     var compilationResult = {};
     return async.series([
         function(cb) {
-            ethConnector.loadSol(path.join(__dirname, "../MilestoneTracket.sol"), function(err, _src) {
+            ethConnector.loadSol(path.join(__dirname, "../MilestoneTracker.sol"), function(err, _src) {
                 if (err) return cb(err);
                 src = _src;
                 cb();
@@ -38,9 +38,9 @@ exports.deploy = function(opts, cb) {
             });
         },
         function(cb) {
-            milestoneTracketAbi = JSON.parse(compilationResult.MilestoneTracket.interface);
-            ethConnector.deploy(compilationResult.MilestoneTracket.interface,
-                compilationResult.Vault.bytecode,
+            milestoneTracketAbi = JSON.parse(compilationResult.MilestoneTracker.interface);
+            ethConnector.deploy(compilationResult.MilestoneTracker.interface,
+                compilationResult.MilestoneTracker.bytecode,
                 0,
                 0,
                 opts.arbitrator,
