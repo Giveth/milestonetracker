@@ -1,7 +1,7 @@
 pragma solidity ^0.4.4;
 
 contract Vault {
-    function preparePayment(string description, address _recipient, uint _value, bytes _data, uint _minPayTime);
+    function authorizePayment(string description, address _recipient, uint _value, bytes _data, uint _minPayTime) returns(uint) {}
 }
 
 contract MilestoneTracker {
@@ -28,7 +28,7 @@ contract MilestoneTracker {
     address public arbitrator;
     Vault public vault;
 
-    enum MilestoneStatus { PendingApproval, NotDone, Done, Paid, Cancelled }
+    enum MilestoneStatus { PendingAcceptance, NotDone, Done, Paid, Cancelled }
 
     struct Milestone {
         string description;
@@ -64,6 +64,7 @@ contract MilestoneTracker {
         arbitrator = _arbitrator;
         donor = _donor;
         recipient = _recipient;
+        verifier = _verifier;
         vault = Vault(_vault);
     }
 
@@ -72,7 +73,7 @@ contract MilestoneTracker {
 // Helper functions
 /////////
 
-    function getNumberOfMilestones() constant returns (uint) {
+    function numberOfMilestones() constant returns (uint) {
         return milestones.length;
     }
 
@@ -108,7 +109,7 @@ contract MilestoneTracker {
 ////////////
 
 
-    function proposeNewMileston(
+    function proposeNewMilestone(
         string _description,
         string _url,
         uint _amount,
@@ -117,8 +118,9 @@ contract MilestoneTracker {
         uint _minDoneDate,
         uint _maxDoneDate,
         uint _reviewTime
-    ) onlyRecipient {
-        Milestone milestone = milestones[milestones.length ++];
+    ) onlyRecipient returns (uint) {
+        uint idMilestone = milestones.length ++;
+        Milestone milestone = milestones[idMilestone];
         milestone.description = _description;
         milestone.url = _url;
         milestone.amount = _amount;
@@ -128,42 +130,52 @@ contract MilestoneTracker {
         milestone.payDestination = _payDestination;
         milestone.payData = _payData;
 
-        milestone.status = MilestoneStatus.PendingApproval;
+        milestone.status = MilestoneStatus.PendingAcceptance;
+        NewProposal(idMilestone);
+        return idMilestone;
     }
 
-    function approveNewMilestoneProposal(uint _idMilestone) onlyDonor campaigNotCancelled {
-        if (_idMilestone <= milestones.length) throw;
+    function acceptNewMilestoneProposal(uint _idMilestone) onlyDonor campaigNotCancelled {
+        if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
+        if (milestone.status != MilestoneStatus.PendingAcceptance) throw;
         milestone.status = MilestoneStatus.NotDone;
+        ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
 
 
     function milestoneCompleted(uint _idMilestone) onlyRecipient campaigNotCancelled {
-        if (_idMilestone <= milestones.length) throw;
+        if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
+        if (milestone.status != MilestoneStatus.NotDone) throw;
+        if (now < milestone.minDoneDate) throw;
+        if (now > milestone.maxDoneDate) throw;
         milestone.status = MilestoneStatus.Done;
+        milestone.doneTime = now;
+        ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
 
     function approveMilestone(uint _idMilestone) onlyVerifier campaigNotCancelled {
-        if (_idMilestone <= milestones.length) throw;
+        if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if (milestone.status != MilestoneStatus.Done) throw;
 
         doPayment(_idMilestone);
     }
 
-    function rejectMilestone(uint _idMilestone) onlyVerifier campaigNotCancelled {
-        if (_idMilestone <= milestones.length) throw;
+    function disapproveMilestone(uint _idMilestone) onlyVerifier campaigNotCancelled {
+        if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if (milestone.status != MilestoneStatus.Done) throw;
 
         milestone.status = MilestoneStatus.NotDone;
+        ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
     function collectMilestone(uint _idMilestone) onlyRecipient campaigNotCancelled {
-        if (_idMilestone <= milestones.length) throw;
+        if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.Done) ||
              (now < milestone.doneTime + milestone.reviewTime))
@@ -173,29 +185,43 @@ contract MilestoneTracker {
     }
 
     function cancelMilestone(uint _idMilestone) onlyRecipient campaigNotCancelled {
-        if (_idMilestone <= milestones.length) throw;
+        if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
-        if  ((milestone.status != MilestoneStatus.PendingApproval) &&
+        if  ((milestone.status != MilestoneStatus.PendingAcceptance) &&
              (milestone.status != MilestoneStatus.NotDone) &&
              (milestone.status != MilestoneStatus.Done))
             throw;
 
         milestone.status = MilestoneStatus.Cancelled;
+        ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
     function forceApproveMileston(uint _idMilestone) onlyArbitrator campaigNotCancelled {
+        if (_idMilestone >= milestones.length) throw;
+        Milestone milestone = milestones[_idMilestone];
+        if  ((milestone.status != MilestoneStatus.NotDone) &&
+             (milestone.status != MilestoneStatus.Done))
+           throw;
         doPayment(_idMilestone);
     }
 
     function doPayment(uint _idMilestone) internal {
-        if (_idMilestone <= milestones.length) throw;
+        if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
+        // Recheck again to not pay 2 times
+        if (milestone.status == MilestoneStatus.Paid) throw;
         milestone.status = MilestoneStatus.Paid;
         milestone.approveTime = now;
-        vault.preparePayment(milestone.description, milestone.payDestination, milestone.amount, milestone.payData, 0);
+        vault.authorizePayment(milestone.description, milestone.payDestination, milestone.amount, milestone.payData, 0);
+        ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
     function cancelCampaign() onlyArbitrator campaigNotCancelled {
         campaignCancelled = true;
+        CampaignCalncelled();
     }
+
+    event NewProposal(uint idProposal);
+    event ProposalStatusChanged(uint idProposal, MilestoneStatus newProposal);
+    event CampaignCalncelled();
 }

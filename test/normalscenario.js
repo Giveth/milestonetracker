@@ -2,8 +2,6 @@
 /*global describe, it, before, beforeEach, after, afterEach */
 "use strict";
 
-
-
 var ethConnector = require('ethconnector');
 var milestoneTrackerHelper = require('../js/milestonetracker_helper.js');
 var vaultHelper = require('vaultcontract');
@@ -15,6 +13,103 @@ var async = require('async');
 var _ = require('lodash');
 
 var verbose = true;
+
+/* SCHEMA OF THE TEST
+        Prop: 0     Prop: 1     Prop: 2     Prop: 3     Prop: 4     Prop: 5
+Stp 1:  Propose     Propose     Propose     Propose     Propose     Propose
+Stp 2:  Accept      Accept      Accept      Accept      Accept      Cancel
+--delay--
+Stp 3:  Done        Done        Done        Done
+Stp 4:  Approve     Disapprove  Disapprove
+Stp 5:              Done        ForceApprove
+--delay--
+Stp 6:                                      Collect
+--delay--
+Stp 7:
+*/
+
+var proposals = [
+    [ // Proposal 0
+        {   // Proposal 0, Step 0
+            acceptNewMilestoneProposal:false,
+            milestoneCompleted:false,
+            approveMilestone: false,
+            disapproveMilestone: false,
+            collectMilestone: false,
+            cancelMilestone: false,
+            forceApproveMileston: false
+        },
+        {   // Proposal 0, Step 1 after propose
+            acceptNewMilestoneProposal:true,
+            milestoneCompleted:false,
+            approveMilestone: false,
+            disapproveMilestone: false,
+            collectMilestone: false,
+            cancelMilestone: true,
+            forceApproveMileston: false
+        },
+        {   // Proposal 0, Step 2
+            action: "acceptNewMilestoneProposal",
+            acceptNewMilestoneProposal:false,
+            milestoneCompleted:false,
+            approveMilestone: false,
+            disapproveMilestone: false,
+            collectMilestone: false,
+            cancelMilestone: true,
+            forceApproveMileston: true
+        },
+        {   // Proposal 0, Step 3
+            action: "milestoneCompleted",
+            acceptNewMilestoneProposal:false,
+            milestoneCompleted:false,
+            approveMilestone: true,
+            disapproveMilestone: true,
+            collectMilestone: false,
+            cancelMilestone: true,
+            forceApproveMileston: true
+        },
+        {   // Proposal 0, Step 4
+            action: "approveMilestone",
+            acceptNewMilestoneProposal:false,
+            milestoneCompleted:false,
+            approveMilestone: false,
+            disapproveMilestone: false,
+            collectMilestone: false,
+            cancelMilestone: false,
+            forceApproveMileston: false,
+            testPayment: true
+        },
+        {   // Proposal 0, Step 5
+            acceptNewMilestoneProposal:false,
+            milestoneCompleted:false,
+            approveMilestone: false,
+            disapproveMilestone: false,
+            collectMilestone: false,
+            cancelMilestone: false,
+            forceApproveMileston: false
+        },
+        {   // Proposal 0, Step 6
+            acceptNewMilestoneProposal:false,
+            milestoneCompleted:false,
+            approveMilestone: false,
+            disapproveMilestone: false,
+            collectMilestone: false,
+            cancelMilestone: false,
+            forceApproveMileston: false
+        },
+        {   // Proposal 0, Step 7
+            acceptNewMilestoneProposal:false,
+            milestoneCompleted:false,
+            approveMilestone: false,
+            disapproveMilestone: false,
+            collectMilestone: false,
+            cancelMilestone: false,
+            forceApproveMileston: false
+        }
+    ]
+];
+
+var caller;
 
 describe('Normal Scenario Milestone test', function(){
     var vault;
@@ -44,6 +139,16 @@ describe('Normal Scenario Milestone test', function(){
             arbitrator = owner;
             donor =ethConnector.accounts[7];
             verifier = ethConnector.accounts[8];
+
+            caller = {
+                acceptNewMilestoneProposal: donor,
+                milestoneCompleted: recipient,
+                approveMilestone: verifier,
+                disapproveMilestone: verifier,
+                collectMilestone: recipient,
+                cancelMilestone: recipient,
+                forceApproveMileston: arbitrator
+            };
             done();
         });
     });
@@ -68,6 +173,7 @@ describe('Normal Scenario Milestone test', function(){
         this.timeout(20000000);
         var now = Math.floor(new Date().getTime() /1000);
 
+        console.log("VA: " +vault.address);
         milestoneTrackerHelper.deploy({
             arbitrator: arbitrator,
             donor: donor,
@@ -81,242 +187,207 @@ describe('Normal Scenario Milestone test', function(){
             done();
         });
     });
- /*   it('Should send some Ether to the Vault', function(done) {
-        vault.receiveEther({
-            from: ethConnector.accounts[0],
-            value: ethConnector.web3.toWei(50)
+    it('Shoult check that vault is valid', function(done) {
+        milestoneTracker.vault(function(err, res) {
+            assert.ifError(err);
+            console.log(res);
+            assert.equal(vault.address.res);
+            done();
+        });
+    });
+    it('Should authorize milestoneTracker as spender', function(done) {
+        this.timeout(20000000);
+        vault.authorizeSpender(milestoneTracker.address, true, {
+            from: owner,
+            gas: 200000
         }, function(err) {
             assert.ifError(err);
-            ethConnector.web3.eth.getBalance(vault.address, function(err, _balance) {
+            vault.allowedSpenders(milestoneTracker.address, function(err, res) {
                 assert.ifError(err);
-                assert.equal(ethConnector.web3.fromWei(_balance), 50);
+                assert.equal(res, true);
                 done();
             });
         });
     });
-    it('Should not allow preparePayment', function(done) {
-        vault.preparePayment(
-            "testPayment",
-            recipient,
-            ethConnector.web3.toWei(10),
-            "",
-            86400*2,
-            {
-                from: spender,
-                gas: 500000
-            },
-            function(err, res) {
-                assert(err);
-                done();
-            }
-        );
-    });
-    it('Should authorize spender', function(done) {
-        vault.authorizeSpender(
-            spender,
-            true,
-            {
-                from: owner,
-                gas: 200000
-            },
-            function(err) {
-                assert.ifError(err);
-                vault.allowedSpenders(spender, function(err, res) {
-                    assert.ifError(err);
-                    assert.equal(res,true);
-                    done();
-                });
-            }
-        );
-    });
-    it('Should allow preparePayment', function(done) {
+    it("Stp0: Should not allow any action before creating the proposals", function(done) {
         this.timeout(20000000);
-        var now;
-        vault.preparePayment(
-            "testPayment",
-            recipient,
-            ethConnector.web3.toWei(10),
-            "0x",
-            86400*2,
-            {
-                from: spender,
-                gas: 500000
-            },
-            function(err, res) {
-                assert.ifError(err);
-                async.series([
-                    function(cb) {
-                        vault.numberOfPayments(function(err, res) {
-                            assert.ifError(err);
-                            assert.equal(res, 1);
-                            cb();
-                        });
-                    },
-                    function(cb) {
-                        ethConnector.web3.eth.getBlock('latest', function(err, _block) {
-                            assert.ifError(err);
-                            now = _block.timestamp;
-                            cb();
-                        });
-                    },
-                    function(cb) {
-                        vault.payments(0, function(err, res) {
-                            assert.ifError(err);
-                            assert.equal(res[0], "testPayment");
-                            assert.equal(res[1], spender);
-                            assert.equal(res[2], now + 86400*2);
-                            assert.equal(res[3], false);
-                            assert.equal(res[4], false);
-                            assert.equal(res[5], recipient);
-                            assert.equal(ethConnector.web3.fromWei(res[6]), 10);
-                            assert.equal(res[7], "0x");
-                            cb();
-                        });
-                    }
-                ],done);
-            }
-        );
+        checkStep(0,done);
     });
-    it('Should desauthorize Spender', function(done) {
-        vault.authorizeSpender(
-            spender,
-            false,
-            {
-                from: owner,
-                gas: 200000
-            },
-            function(err) {
+    it('Stp1: Should generate 6 proposals', function(done) {
+        this.timeout(20000000);
+        var now = new Date().getTime() / 1000;
+        async.eachSeries(_.range(6), function(i, cb) {
+            milestoneTracker.proposeNewMilestone(
+                "Proposal " + i,
+                "",
+                ethConnector.web3.toWei(i),
+                recipient,
+                "",
+                now+86400,
+                now+86400*3,
+                86400*2,
+                {
+                    from: recipient,
+                    gas: 500000
+                },
+                cb
+                );
+        }, function(err) {
+            assert.ifError(err);
+            milestoneTracker.numberOfMilestones(function(err, res) {
                 assert.ifError(err);
-                vault.allowedSpenders(spender, function(err, res) {
-                    assert.ifError(err);
-                    assert.equal(res,false);
-                    done();
-                });
-            }
-        );
+                assert.equal(res,6);
+                checkStep(1,done);
+            });
+        });
     });
-    it('Should not allow preparePayment adter desauthorizing', function(done) {
-        vault.preparePayment(
-            "testPayment",
-            recipient,
-            ethConnector.web3.toWei(10),
-            "",
-            86400*2,
-            {
-                from: spender,
-                gas: 500000
-            },
-            function(err, res) {
-                assert(err);
-                done();
-            }
-        );
+    it('Stp2: Should approve first five and cancel the other', function(done) {
+        this.timeout(20000000);
+        checkStep(2,done);
+    });
+    it('Should delay until proposals are doable', function(done) {
+        bcDelay(86400 +1, done);
+    });
+    it('Stp3: Mark proposals as done', function(done) {
+        this.timeout(20000000);
+        checkStep(3,done);
+    });
+    it('Step4: Approve or disapprove', function(done) {
+        this.timeout(20000000);
+        checkStep(4,done);
+    });
+    it('Step5: Done and force aprove', function(done) {
+        this.timeout(20000000);
+        checkStep(5,done);
+    });
+    it('Should delay until proposal aproves automatically', function(done) {
+        bcDelay(86400 +1, done);
+    });
+    it('Step6: Collect', function(done) {
+        this.timeout(20000000);
+        checkStep(6,done);
+    });
+    it('Should delay until proposals expires', function(done) {
+        bcDelay(86400 +1, done);
+    });
+    it('Step7: Expiration', function(done) {
+        this.timeout(20000000);
+        checkStep(7,done);
     });
 
-    it('Should not allow executePayment', function(done) {
-        vault.executePayment(
-            0,
+    function checkStep(step, cb) {
+        async.eachSeries(_.range(proposals.length), function(proposal, cb) {
+            log("Start check step: " + step + " Proposal: "+proposal);
+            async.series([
+                function(cb) {
+                    doAction(proposal, proposals[proposal][step].action, cb);
+                },
+                function(cb) {
+                    checkStepProposal(step, proposal, cb);
+                },
+                function(cb) {
+                    if (proposals[proposal][step].checkPayment) {
+                        checkPayment(proposal, cb);
+                    } else {
+                        cb();
+                    }
+                }
+            ], cb);
+        }, cb);
+    }
+
+    function doAction(proposal, action, cb) {
+        if (!action) return cb();
+        log("Proposa: "+ proposal + " Action: " + action + " Sender: " + caller[action]);
+        milestoneTracker[action](proposal,
             {
-                from: recipient,
-                gas: 500000
-            },
-            function(err, res) {
-                assert(err);
-                done();
-            }
-        );
-    });
-    it('Should delay', function(done) {
-        bcDelay(86400*2+1, done);
-    });
-    it('Should not allow executePayment if not authorized', function(done) {
-        vault.executePayment(
-            0,
-            {
-                from: recipient,
-                gas: 500000
-            },
-            function(err, res) {
-                assert(err);
-                done();
-            }
-        );
-    });
-    it('Should reauthorize spender', function(done) {
-        vault.authorizeSpender(
-            spender,
-            true,
-            {
-                from: owner,
-                gas: 200000
-            },
-            function(err) {
+                from: caller[action],
+                gas: 2000000
+            },function(err, res) {
                 assert.ifError(err);
-                vault.allowedSpenders(spender, function(err, res) {
+                milestoneTracker.milestones(proposal, function(err, res) {
                     assert.ifError(err);
-                    assert.equal(res,true);
-                    done();
+                    console.log("Proposal: " + JSON.stringify(res));
+                    cb();
                 });
             }
         );
-    });
-    it('Should allow payment', function(done) {
-        var beforeBalance;
-        var afterBalance;
+    }
+
+    function checkPayment(proposal,cb) {
+        var numberOfPayments;
+        var payment;
+        var i=0;
         async.series([
             function(cb) {
-                ethConnector.web3.eth.getBalance(recipient, function(err, res) {
+                vault.numberOfPayments(function(err, res) {
                     assert.ifError(err);
-                    beforeBalance = res;
+                    numberOfPayments = res;
                     cb();
                 });
             },
             function(cb) {
-                vault.executePayment(
-                    0,
-                    {
-                        from: guest,
-                        gas: 500000
+
+                async.whilest(
+                    function() { return (i< numberOfPayments)&&(!payment); },
+                    function(cb) {
+                        vault.payment(i, function(err, res) {
+                            assert.ifError(err);
+                            if (res[0] === "Payment "+i) {
+                                payment = res;
+                            } else {
+                                i++;
+                            }
+                            cb();
+                        });
                     },
-                    function(err, res) {
-                        assert.ifError(err);
-                        cb();
-                    }
+                    cb
                 );
             },
             function(cb) {
-                ethConnector.web3.eth.getBalance(recipient, function(err, res) {
-                    assert.ifError(err);
-                    afterBalance = res;
-                    var increment = afterBalance.sub(beforeBalance);
-                    assert.equal(ethConnector.web3.fromWei(increment),10);
+                var now = new Date().getTime() / 1000;
+                assert.equal(payment[1], milestoneTracker.address);
+                assert(payment[2]>=now+86400);
+                assert(payment[2]-now<86430);
+                assert.equal(payment[3], false);  // cancelled
+                assert.equal(payment[4], false);  // payed
+                assert.equal(payment[5], recipient);
+                assert.vault(payment[6], ethConnector.web3.toWei(i));
+                cb();
+            }
+        ], cb);
+    }
+
+    function checkStepProposal(step, proposal, cb) {
+
+        async.eachSeries(
+            [
+                'acceptNewMilestoneProposal',
+                'milestoneCompleted',
+                'approveMilestone',
+                'disapproveMilestone',
+                'collectMilestone',
+                'cancelMilestone',
+                'forceApproveMileston'
+            ],
+            function(method,cb) {
+                log("Check Step: " + step + " Proposal: "+proposal+ " Method: " + method);
+                milestoneTracker[method].estimateGas(proposal, {
+                    from: caller[method],
+                    gas: 4000000
+                }, function(err, res) {
+                    if (proposals[proposal][step][method]) {
+                        assert.ifError(err);
+                    } else {
+                        assert(err);
+                    }
                     cb();
                 });
             },
-            function(cb) {
-                vault.payments(0, function(err, res) {
-                    assert.ifError(err);
-                    assert.equal(res[3], false);
-                    assert.equal(res[4], true);
-                    cb();
-                });
-            }
-        ], done);
-    });
-    it('Should not execute payment 2 times', function(done) {
-        vault.executePayment(
-            0,
-            {
-                from: recipient,
-                gas: 500000
-            },
-            function(err, res) {
-                assert(err);
-                done();
-            }
+            cb
         );
-    });
-*/
+    }
+
     function bcDelay(secs, cb) {
         send("evm_increaseTime", [secs], function(err, result) {
             if (err) return cb(err);

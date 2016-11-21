@@ -47,7 +47,7 @@ exports.deploy = function(opts, cb) {
                 opts.donor,
                 opts.verifier,
                 opts.recipient,
-                opts._vault,
+                opts.vault,
                 function(err, _milestoneTracket) {
                     if (err) return cb(err);
                     milestoneTracket = _milestoneTracket;
