@@ -196,7 +196,7 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    function forceApproveMileston(uint _idMilestone) onlyArbitrator campaigNotCancelled {
+    function forceApproveMilestone(uint _idMilestone) onlyArbitrator campaigNotCancelled {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.NotDone) &&
