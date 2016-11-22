@@ -8,7 +8,6 @@ contract MilestoneTracker {
     modifier onlyRecipient { if (msg.sender !=  recipient) throw; _; }
     modifier onlyArbitrator { if (msg.sender != arbitrator) throw; _; }
     modifier onlyDonor { if (msg.sender != donor) throw; _; }
-    modifier onlyVerifier { if (msg.sender != verifier) throw; _; }
 
     modifier onlyDonorOrRecipient {
         if ((msg.sender != recipient) &&
@@ -23,7 +22,6 @@ contract MilestoneTracker {
     }
 
     address public recipient;
-    address public verifier;
     address public donor;
     address public arbitrator;
     Vault public vault;
@@ -36,13 +34,13 @@ contract MilestoneTracker {
         uint amount;
         uint minDoneDate;
         uint maxDoneDate;
+        address reviewer;
         uint reviewTime;
         address payDestination;
         bytes payData;
 
         MilestoneStatus status;
         uint doneTime;
-        uint approveTime;
     }
 
     Milestone[] public milestones;
@@ -54,17 +52,16 @@ contract MilestoneTracker {
 // Constuctor
 ///////////
 
+
     function MilestoneTracker (
         address _arbitrator,
         address _donor,
-        address _verifier,
         address _recipient,
         address _vault
     ) {
         arbitrator = _arbitrator;
         donor = _donor;
         recipient = _recipient;
-        verifier = _verifier;
         vault = Vault(_vault);
     }
 
@@ -95,10 +92,6 @@ contract MilestoneTracker {
         recipient = _newRecipient;
     }
 
-    function changeVerifier(address _newRecipient) onlyVerifier {
-        recipient = _newRecipient;
-    }
-
     function changeVault(address _newVaultAddr) onlyDonor {
         vault = Vault(_newVaultAddr);
     }
@@ -117,6 +110,7 @@ contract MilestoneTracker {
         bytes _payData,
         uint _minDoneDate,
         uint _maxDoneDate,
+        address _reviewer,
         uint _reviewTime
     ) onlyRecipient returns (uint) {
         uint idMilestone = milestones.length ++;
@@ -126,6 +120,7 @@ contract MilestoneTracker {
         milestone.amount = _amount;
         milestone.minDoneDate = _minDoneDate;
         milestone.maxDoneDate = _maxDoneDate;
+        milestone.reviewer = _reviewer;
         milestone.reviewTime = _reviewTime;
         milestone.payDestination = _payDestination;
         milestone.payData = _payData;
@@ -157,18 +152,20 @@ contract MilestoneTracker {
     }
 
 
-    function approveMilestone(uint _idMilestone) onlyVerifier campaigNotCancelled {
+    function approveMilestone(uint _idMilestone) campaigNotCancelled {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
-        if (milestone.status != MilestoneStatus.Done) throw;
+        if ((msg.sender != milestone.reviewer) ||
+            (milestone.status != MilestoneStatus.Done)) throw;
 
         doPayment(_idMilestone);
     }
 
-    function disapproveMilestone(uint _idMilestone) onlyVerifier campaigNotCancelled {
+    function disapproveMilestone(uint _idMilestone) campaigNotCancelled {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
-        if (milestone.status != MilestoneStatus.Done) throw;
+        if ((msg.sender != milestone.reviewer) ||
+            (milestone.status != MilestoneStatus.Done)) throw;
 
         milestone.status = MilestoneStatus.NotDone;
         ProposalStatusChanged(_idMilestone, milestone.status);
@@ -211,7 +208,6 @@ contract MilestoneTracker {
         // Recheck again to not pay 2 times
         if (milestone.status == MilestoneStatus.Paid) throw;
         milestone.status = MilestoneStatus.Paid;
-        milestone.approveTime = now;
         vault.authorizePayment(milestone.description, milestone.payDestination, milestone.amount, milestone.payData, 0);
         ProposalStatusChanged(_idMilestone, milestone.status);
     }

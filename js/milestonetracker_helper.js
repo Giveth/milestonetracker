@@ -6,7 +6,6 @@ var ethConnector = require('ethconnector');
 var path = require('path');
 var _ = require('lodash');
 
-
 var milestoneTracketAbi;
 var milestoneTracket;
 
@@ -45,7 +44,6 @@ exports.deploy = function(opts, cb) {
                 0,
                 opts.arbitrator,
                 opts.donor,
-                opts.verifier,
                 opts.recipient,
                 opts.vault,
                 function(err, _milestoneTracket) {

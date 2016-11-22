@@ -436,7 +436,7 @@ describe('Normal Scenario Milestone test', function(){
     var guest;
     var arbitrator;
     var donor;
-    var verifier;
+    var reviewer;
 
     before(function(done) {
 //        ethConnector.init('rpc', function(err) {
@@ -451,13 +451,13 @@ describe('Normal Scenario Milestone test', function(){
             guest = ethConnector.accounts[6];
             arbitrator = owner;
             donor =ethConnector.accounts[7];
-            verifier = ethConnector.accounts[8];
+            reviewer = ethConnector.accounts[8];
 
             caller = {
                 acceptNewMilestoneProposal: donor,
                 milestoneCompleted: recipient,
-                approveMilestone: verifier,
-                disapproveMilestone: verifier,
+                approveMilestone: reviewer,
+                disapproveMilestone: reviewer,
                 collectMilestone: recipient,
                 cancelMilestone: recipient,
                 forceApproveMilestone: arbitrator
@@ -472,9 +472,10 @@ describe('Normal Scenario Milestone test', function(){
         vaultHelper.deploy({
             escapeCaller: hatchCaller,
             escapeDestination: hatchReceiver,
-            guardian: guardian,
             absoluteMinTimeLock: 86400,
-            timeLock: 86400*2
+            timeLock: 86400*2,
+            guardian: guardian,
+            maxGuardianDelay: 86400*21
         }, function(err, _vault) {
             assert.ifError(err);
             assert.ok(_vault.address);
@@ -485,11 +486,9 @@ describe('Normal Scenario Milestone test', function(){
     it('should deploy milestoneTracker contracts ', function(done){
         this.timeout(20000);
         var now = Math.floor(new Date().getTime() /1000);
-
         milestoneTrackerHelper.deploy({
             arbitrator: arbitrator,
             donor: donor,
-            verifier: verifier,
             recipient: recipient,
             vault: vault.address
         }, function(err, _milestoneTracker) {
@@ -536,10 +535,11 @@ describe('Normal Scenario Milestone test', function(){
                 "",
                 now+86400,
                 now+86400*3,
+                reviewer,
                 86400*2,
                 {
                     from: recipient,
-                    gas: 500000
+                    gas: 800000
                 },
                 cb
                 );
