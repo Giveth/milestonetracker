@@ -5,6 +5,8 @@ var async = require('async');
 var ethConnector = require('ethconnector');
 var path = require('path');
 var _ = require('lodash');
+var rlp = require('rlp');
+var BigNumber = require('bignumber.js');
 
 var milestoneTracketAbi;
 var milestoneTracket;
@@ -56,4 +58,49 @@ exports.deploy = function(opts, cb) {
         if (err) return cb(err);
         cb(null,milestoneTracket, compilationResult);
     });
+};
+
+exports.milestones2bytes = function(milestones) {
+    function n2buff(a) {
+        var S= new BigNumber(a).toString(16);
+        if (S.length % 2 === 1) S='0' +S;
+        return new Buffer(S,'hex');
+    }
+
+    var d = _.map(milestones, function(milestone) {
+        return [
+            new Buffer(milestone.description),
+            new Buffer(milestone.url),
+            n2buff(milestone.amount),
+            n2buff(milestone.minDoneDate),
+            n2buff(milestone.maxDoneDate),
+            milestone.reviewer,
+            n2buff(milestone.reviewTime),
+            milestone.payDestination,
+            milestone.payData
+        ];
+    });
+
+    var b= rlp.encode(d);
+    return '0x' + b.toString('hex');
+};
+
+exports.bytes2milestones = function(b) {
+
+    var d = rlp.decode(b);
+    var milestones = _.map(d, function(milestone) {
+        return {
+            description: milestone[0].toString('utf8'),
+            url: milestone[1].toString('utf8'),
+            amount: new BigNumber("0x" + milestone[2].toString('hex')),
+            minDoneDate: new BigNumber("0x" + milestone[3].toString('hex')),
+            maxDoneDate: new BigNumber("0x" + milestone[4].toString('hex')),
+            reviewer: '0x' + milestone[5].toString('hex'),
+            reviewTime: new BigNumber("0x" + milestone[6].toString('hex')),
+            payDestination: '0x' + milestone[7].toString('hex'),
+            payData: '0x' + milestone[8].toString('hex')
+        };
+    });
+    return milestones;
+
 };

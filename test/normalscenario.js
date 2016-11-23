@@ -15,9 +15,9 @@ var _ = require('lodash');
 var verbose = false;
 
 /* SCHEMA OF THE TEST
-        Prop: 0     Prop: 1     Prop: 2     Prop: 3     Prop: 4
-Stp 1:  Propose     Propose     Propose     Propose     Propose
-Stp 2:  Accept      Accept      Accept      Accept      Cancel
+        Prop: 0     Prop: 1     Prop: 2     Prop: 3
+Stp 1:  Propose     Propose     Propose     Propose
+Stp 2:  Accept      Accept      Accept      Accept
 --delay--
 Stp 3:  Done        Done        Done
 Stp 4:  Approve     Disapprove  Disapprove
@@ -31,7 +31,6 @@ Stp 7:
 var proposals = [
     [ // Proposal 0
         {   // Proposal 0, Step 0
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -40,17 +39,14 @@ var proposals = [
             forceApproveMilestone: false
         },
         {   // Proposal 0, Step 1 after propose
-            acceptNewMilestoneProposal:true,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
             collectMilestone: false,
-            cancelMilestone: true,
+            cancelMilestone: false,
             forceApproveMilestone: false
         },
         {   // Proposal 0, Step 2
-            action: "acceptNewMilestoneProposal",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -60,7 +56,6 @@ var proposals = [
         },
         {   // Proposal 0, Step 3
             action: "milestoneCompleted",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: true,
             disapproveMilestone: true,
@@ -70,7 +65,6 @@ var proposals = [
         },
         {   // Proposal 0, Step 4
             action: "approveMilestone",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -80,7 +74,6 @@ var proposals = [
             testPayment: true
         },
         {   // Proposal 0, Step 5
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -89,7 +82,6 @@ var proposals = [
             forceApproveMilestone: false
         },
         {   // Proposal 0, Step 6
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -98,7 +90,6 @@ var proposals = [
             forceApproveMilestone: false
         },
         {   // Proposal 0, Step 7
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -110,7 +101,6 @@ var proposals = [
 
     [ // Proposal 1
         {   // Proposal 1, Step 0
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -119,17 +109,14 @@ var proposals = [
             forceApproveMilestone: false
         },
         {   // Proposal 1, Step 1 after propose
-            acceptNewMilestoneProposal:true,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
             collectMilestone: false,
-            cancelMilestone: true,
+            cancelMilestone: false,
             forceApproveMilestone: false
         },
         {   // Proposal 1, Step 2
-            action: "acceptNewMilestoneProposal",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -139,7 +126,6 @@ var proposals = [
         },
         {   // Proposal 1, Step 3
             action: "milestoneCompleted",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: true,
             disapproveMilestone: true,
@@ -149,7 +135,6 @@ var proposals = [
         },
         {   // Proposal 1, Step 4
             action: "disapproveMilestone",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:true,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -159,7 +144,6 @@ var proposals = [
         },
         {   // Proposal 1, Step 5
             action: "milestoneCompleted",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: true,
             disapproveMilestone: true,
@@ -169,7 +153,6 @@ var proposals = [
         },
         {   // Proposal 1, Step 6
             action: "collectMilestone",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -179,7 +162,6 @@ var proposals = [
             testPayment: true
         },
         {   // Proposal 1, Step 7
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -192,7 +174,6 @@ var proposals = [
 
     [ // Proposal 2
         {   // Proposal 2, Step 0
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -201,17 +182,14 @@ var proposals = [
             forceApproveMilestone: false
         },
         {   // Proposal 2, Step 1 after propose
-            acceptNewMilestoneProposal:true,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
             collectMilestone: false,
-            cancelMilestone: true,
+            cancelMilestone: false,
             forceApproveMilestone: false
         },
         {   // Proposal 2, Step 2
-            action: "acceptNewMilestoneProposal",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -221,7 +199,6 @@ var proposals = [
         },
         {   // Proposal 2, Step 3
             action: "milestoneCompleted",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: true,
             disapproveMilestone: true,
@@ -231,7 +208,6 @@ var proposals = [
         },
         {   // Proposal 2, Step 4
             action: "disapproveMilestone",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:true,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -241,7 +217,6 @@ var proposals = [
         },
         {   // Proposal 2, Step 5
             action: "forceApproveMilestone",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -251,7 +226,6 @@ var proposals = [
             testPayment: true
         },
         {   // Proposal 2, Step 6
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -260,7 +234,6 @@ var proposals = [
             forceApproveMilestone: false,
         },
         {   // Proposal 2, Step 7
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -271,7 +244,6 @@ var proposals = [
     ],
     [ // Proposal 3
         {   // Proposal 3, Step 0
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -280,17 +252,14 @@ var proposals = [
             forceApproveMilestone: false
         },
         {   // Proposal 3, Step 1 after propose
-            acceptNewMilestoneProposal:true,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
             collectMilestone: false,
-            cancelMilestone: true,
+            cancelMilestone: false,
             forceApproveMilestone: false
         },
         {   // Proposal 3, Step 2
-            action: "acceptNewMilestoneProposal",
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -299,7 +268,6 @@ var proposals = [
             forceApproveMilestone: true
         },
         {   // Proposal 3, Step 3
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:true,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -308,7 +276,6 @@ var proposals = [
             forceApproveMilestone: true
         },
         {   // Proposal 3, Step 4
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:true,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -317,7 +284,6 @@ var proposals = [
             forceApproveMilestone: true,
         },
         {   // Proposal 3, Step 5
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:true,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -326,7 +292,6 @@ var proposals = [
             forceApproveMilestone: true,
         },
         {   // Proposal 3, Step 6
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -335,7 +300,6 @@ var proposals = [
             forceApproveMilestone: true,
         },
         {   // Proposal 3, Step 7
-            acceptNewMilestoneProposal:false,
             milestoneCompleted:false,
             approveMilestone: false,
             disapproveMilestone: false,
@@ -343,83 +307,7 @@ var proposals = [
             cancelMilestone: true,
             forceApproveMilestone: true
         }
-    ],
-    [ // Proposal 4
-        {   // Proposal 4, Step 0
-            acceptNewMilestoneProposal:false,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: false,
-            forceApproveMilestone: false
-        },
-        {   // Proposal 4, Step 1 after propose
-            acceptNewMilestoneProposal:true,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: true,
-            forceApproveMilestone: false
-        },
-        {   // Proposal 4, Step 2
-            action: "cancelMilestone",
-            acceptNewMilestoneProposal:false,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: false,
-            forceApproveMilestone: false
-        },
-        {   // Proposal 4, Step 3
-            acceptNewMilestoneProposal:false,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: false,
-            forceApproveMilestone: false
-        },
-        {   // Proposal 4, Step 4
-            acceptNewMilestoneProposal:false,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: false,
-            forceApproveMilestone: false,
-        },
-        {   // Proposal 4, Step 5
-            acceptNewMilestoneProposal:false,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: false,
-            forceApproveMilestone: false,
-        },
-        {   // Proposal 4, Step 6
-            acceptNewMilestoneProposal:false,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: false,
-            forceApproveMilestone: false,
-        },
-        {   // Proposal 4, Step 7
-            acceptNewMilestoneProposal:false,
-            milestoneCompleted:false,
-            approveMilestone: false,
-            disapproveMilestone: false,
-            collectMilestone: false,
-            cancelMilestone: false,
-            forceApproveMilestone: false
-        }
     ]
-
 ];
 
 var caller;
@@ -438,9 +326,12 @@ describe('Normal Scenario Milestone test', function(){
     var donor;
     var reviewer;
 
+    var milestonesBytes;
+    var milestones;
+
     before(function(done) {
 //        ethConnector.init('rpc', function(err) {
-        ethConnector.init('testrpc' ,function(err) {
+        ethConnector.init('testrpc' ,{gasLimit: 4000000}, function(err) {
             if (err) return done(err);
             owner = ethConnector.accounts[0];
             hatchCaller = ethConnector.accounts[1];
@@ -454,7 +345,6 @@ describe('Normal Scenario Milestone test', function(){
             reviewer = ethConnector.accounts[8];
 
             caller = {
-                acceptNewMilestoneProposal: donor,
                 milestoneCompleted: recipient,
                 approveMilestone: reviewer,
                 disapproveMilestone: reviewer,
@@ -523,38 +413,82 @@ describe('Normal Scenario Milestone test', function(){
         this.timeout(20000);
         checkStep(0,done);
     });
-    it('Stp1: Should generate 6 proposals', function(done) {
-        this.timeout(20000);
+    it('Stp1: Should propose the proposals', function(done) {
+        this.timeout(20000000);
         var now = Math.floor(new Date().getTime() / 1000);
-        async.eachSeries(_.range(6), function(i, cb) {
-            milestoneTracker.proposeNewMilestone(
-                "Proposal " + i,
-                "",
-                ethConnector.web3.toWei(i),
-                recipient,
-                "",
-                now+86400,
-                now+86400*3,
-                reviewer,
-                86400*2,
-                {
-                    from: recipient,
-                    gas: 800000
-                },
-                cb
-                );
-        }, function(err) {
+
+        milestones = [];
+        for (var i=0; i<4; i++) {
+            milestones.push({
+                description: "Proposal " + i,
+                url: "http://url_" + i,
+                amount: ethConnector.web3.toWei(i),
+                minDoneDate: now+86400,
+                maxDoneDate: now+86400*3,
+                reviewer: reviewer,
+                reviewTime: 86400*2,
+                payDestination: recipient,
+                payData: "0x"
+            });
+        }
+
+        milestonesBytes = milestoneTrackerHelper.milestones2bytes(milestones);
+        var calcMilestones = milestoneTrackerHelper.bytes2milestones(milestonesBytes);
+        assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones));
+
+        milestoneTracker.proposeMilestones(milestonesBytes, {
+            from: recipient,
+            gas: 1000000
+        },function(err, res) {
             assert.ifError(err);
-            milestoneTracker.numberOfMilestones(function(err, res) {
+            milestoneTracker.proposedMilestones(function(err, res) {
                 assert.ifError(err);
-                assert.equal(res,6);
+                assert.equal(res,milestonesBytes);
+                var calcMilestones = milestoneTrackerHelper.bytes2milestones(res);
+                assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones));
                 checkStep(1,done);
             });
         });
     });
-    it('Stp2: Should approve first five and cancel the other', function(done) {
-        this.timeout(20000);
-        checkStep(2,done);
+    it('Stp2: Should approve the proposals', function(done) {
+        this.timeout(20000000);
+        milestoneTracker.acceptProposedMilestones(ethConnector.web3.sha3( milestonesBytes, {encoding: 'hex'}), {from: donor, gas: 2000000}, function(err) {
+            assert.ifError(err);
+            async.series([
+                function(cb) {
+                         milestoneTracker.numberOfMilestones(function(err, res) {
+                            assert.ifError(err);
+                            assert.equal(res,4);
+                            cb();
+                        });
+                },
+                function(cb) {
+                    var i =0;
+                    async.whilst(
+                    function() { return i<4; },
+                    function(cb) {
+                        milestoneTracker.milestones(i, function(err, res) {
+                            assert.ifError(err);
+                            assert.equal(res[0], milestones[i].description);
+                            assert.equal(res[1], milestones[i].url);
+                            assert.equal(res[2], milestones[i].amount);
+                            assert.equal(res[3], milestones[i].minDoneDate);
+                            assert.equal(res[4], milestones[i].maxDoneDate);
+                            assert.equal(res[5], milestones[i].reviewer);
+                            assert.equal(res[6], milestones[i].reviewTime);
+                            assert.equal(res[7], milestones[i].payDestination);
+                            assert.equal(res[8], milestones[i].payData);
+                            i++;
+                            cb();
+                        });
+                    },
+                    cb);
+                },
+                function(cb) {
+                    checkStep(2,done);
+                }
+            ], done);
+        });
     });
     it('Should delay until proposals are doable', function(done) {
         bcDelay(86400 +1, done);
@@ -673,7 +607,6 @@ describe('Normal Scenario Milestone test', function(){
 
         async.eachSeries(
             [
-                'acceptNewMilestoneProposal',
                 'milestoneCompleted',
                 'approveMilestone',
                 'disapproveMilestone',
@@ -730,5 +663,21 @@ describe('Normal Scenario Milestone test', function(){
           params: params || [],
           id: new Date().getTime()
         }, callback);
+    }
+
+    function normalizeMilestones(milestones) {
+        _.map(milestones, function(milestone) {
+            return {
+                description: milestone.description,
+                url: milestone.url,
+                amount: new BigNumber(milestone.amount).toString(),
+                minDoneDate: new BigNumber(milestone.minDoneDate).toString(),
+                maxDoneDate: new BigNumber(milestone.maxDoneDate).toString(),
+                reviewer: milestone.reviewer,
+                reviewTime: new BigNumber(milestone.reviewTime).toString(),
+                payDestination: milestone.payDestination,
+                payData: milestone.payData
+            };
+        });
     }
 });
