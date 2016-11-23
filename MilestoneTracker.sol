@@ -16,20 +16,13 @@ contract MilestoneTracker {
     modifier onlyArbitrator { if (msg.sender != arbitrator) throw; _; }
     modifier onlyDonor { if (msg.sender != donor) throw; _; }
 
-    modifier onlyDonorOrRecipient {
-        if ((msg.sender != recipient) &&
-            (msg.sender != donor))
-            throw;
-        _;
-    }
-
-    modifier campaigNotCancelled {
+    modifier campaignNotCancelled {
         if (campaignCancelled) throw;
         _;
     }
 
     modifier notChanging {
-        if (proposingMilestones) throw;
+        if (changingMilestones) throw;
         _;
     }
 
@@ -61,7 +54,7 @@ contract MilestoneTracker {
 
     bytes public proposedMilestones;
 
-    bool public proposingMilestones;
+    bool public changingMilestones;
 
 
 
@@ -119,32 +112,32 @@ contract MilestoneTracker {
 ////////////
 
 
-    /// @param _newilestones RLP list encoded milestones. Each mileston has
-    ///   this fields:
-    ///       string _description,
-    ///       string _url,
-    ///       uint _amount,
-    ///       address _payDestination,
-    ///       bytes _payData,
-    ///       uint _minDoneDate,
-    ///       uint _maxDoneDate,
-    ///       address _reviewer,
-    ///       uint _reviewTime
+    // @param _newMilestones RLP list encoded milestones. Each mileston has
+    //   this fields:
+    //       string _description,
+    //       string _url,
+    //       uint _amount,
+    //       address _payDestination,
+    //       bytes _payData,
+    //       uint _minDoneDate,
+    //       uint _maxDoneDate,
+    //       address _reviewer,
+    //       uint _reviewTime
 
-    function proposeMilestones(bytes _newilestones) onlyRecipient campaigNotCancelled {
+    function proposeMilestones(bytes _newilestones) onlyRecipient campaignNotCancelled {
         proposedMilestones = _newilestones;
-        proposingMilestones = true;
+        changingMilestones = true;
     }
 
-    function unproposeMilestones() onlyRecipient campaigNotCancelled {
+    function unproposeMilestones() onlyRecipient campaignNotCancelled {
         delete proposedMilestones;
-        proposingMilestones = false;
+        changingMilestones = false;
     }
 
-    function acceptProposedMilestones(bytes32 hashProposals) onlyDonor campaigNotCancelled {
+    function acceptProposedMilestones(bytes32 hashProposals) onlyDonor campaignNotCancelled {
 
         uint i;
-        if (!proposingMilestones) throw;
+        if (!changingMilestones) throw;
         if (sha3(proposedMilestones) != hashProposals) throw;
 
         // Cancel all not finished milestones until now
@@ -187,11 +180,12 @@ contract MilestoneTracker {
 
         }
 
-        proposingMilestones = false;
+        delete proposedMilestones;
+        changingMilestones = false;
         NewProposals();
     }
 
-    function milestoneCompleted(uint _idMilestone) onlyRecipient campaigNotCancelled notChanging {
+    function milestoneCompleted(uint _idMilestone) onlyRecipient campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if (milestone.status != MilestoneStatus.NotDone) throw;
@@ -203,7 +197,7 @@ contract MilestoneTracker {
     }
 
 
-    function approveMilestone(uint _idMilestone) campaigNotCancelled notChanging {
+    function approveMilestone(uint _idMilestone) campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if ((msg.sender != milestone.reviewer) ||
@@ -212,7 +206,7 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    function disapproveMilestone(uint _idMilestone) campaigNotCancelled notChanging {
+    function disapproveMilestone(uint _idMilestone) campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if ((msg.sender != milestone.reviewer) ||
@@ -222,7 +216,7 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    function collectMilestone(uint _idMilestone) onlyRecipient campaigNotCancelled notChanging {
+    function collectMilestone(uint _idMilestone) onlyRecipient campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.Done) ||
@@ -232,7 +226,7 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    function cancelMilestone(uint _idMilestone) onlyRecipient campaigNotCancelled notChanging {
+    function cancelMilestone(uint _idMilestone) onlyRecipient campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.NotDone) &&
@@ -243,7 +237,7 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    function forceApproveMilestone(uint _idMilestone) onlyArbitrator campaigNotCancelled notChanging {
+    function forceApproveMilestone(uint _idMilestone) onlyArbitrator campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.NotDone) &&
@@ -262,7 +256,7 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    function cancelCampaign() onlyArbitrator campaigNotCancelled {
+    function cancelCampaign() onlyArbitrator campaignNotCancelled {
         campaignCancelled = true;
         CampaignCalncelled();
     }
