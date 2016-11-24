@@ -379,19 +379,11 @@ describe('Normal Scenario Milestone test', function(){
         milestoneTrackerHelper.deploy({
             arbitrator: arbitrator,
             donor: donor,
-            recipient: recipient,
-            vault: vault.address
+            recipient: recipient
         }, function(err, _milestoneTracker) {
             assert.ifError(err);
             assert.ok(_milestoneTracker.address);
             milestoneTracker = _milestoneTracker;
-            done();
-        });
-    });
-    it('Shoult check that vault is valid', function(done) {
-        milestoneTracker.vault(function(err, res) {
-            assert.ifError(err);
-            assert.equal(vault.address.res);
             done();
         });
     });
@@ -422,13 +414,13 @@ describe('Normal Scenario Milestone test', function(){
             milestones.push({
                 description: "Proposal " + i,
                 url: "http://url_" + i,
-                amount: ethConnector.web3.toWei(i),
+                amount: 0,
                 minDoneDate: now+86400,
                 maxDoneDate: now+86400*3,
                 reviewer: reviewer,
                 reviewTime: 86400*2,
-                payDestination: recipient,
-                payData: "0x"
+                payDestination: vault.address,
+                payData: vault.authorizePayment.getData("Proposal " +i, recipient, ethConnector.web3.toWei(i), 0)
             });
         }
 

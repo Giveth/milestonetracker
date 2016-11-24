@@ -2,15 +2,10 @@ pragma solidity ^0.4.4;
 
 import "RLP.sol";
 
-contract Vault {
-    function authorizePayment(string description, address _recipient, uint _value, bytes _data, uint _minPayTime) returns(uint) {}
-}
-
 contract MilestoneTracker {
     using RLP for RLP.RLPItem;
     using RLP for RLP.Iterator;
     using RLP for bytes;
-
 
     modifier onlyRecipient { if (msg.sender !=  recipient) throw; _; }
     modifier onlyArbitrator { if (msg.sender != arbitrator) throw; _; }
@@ -29,7 +24,6 @@ contract MilestoneTracker {
     address public recipient;
     address public donor;
     address public arbitrator;
-    Vault public vault;
 
     enum MilestoneStatus { NotDone, Done, Paid, Cancelled }
 
@@ -66,13 +60,11 @@ contract MilestoneTracker {
     function MilestoneTracker (
         address _arbitrator,
         address _donor,
-        address _recipient,
-        address _vault
+        address _recipient
     ) {
         arbitrator = _arbitrator;
         donor = _donor;
         recipient = _recipient;
-        vault = Vault(_vault);
     }
 
 
@@ -100,10 +92,6 @@ contract MilestoneTracker {
 
     function changeRecipient(address _newRecipient) onlyRecipient {
         recipient = _newRecipient;
-    }
-
-    function changeVault(address _newVaultAddr) onlyRecipient {
-        vault = Vault(_newVaultAddr);
     }
 
 
@@ -252,7 +240,7 @@ contract MilestoneTracker {
         // Recheck again to not pay 2 times
         if (milestone.status == MilestoneStatus.Paid) throw;
         milestone.status = MilestoneStatus.Paid;
-        vault.authorizePayment(milestone.description, milestone.payDestination, milestone.amount, milestone.payData, 0);
+        milestone.payDestination.call.value(milestone.amount)(milestone.payData);
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
