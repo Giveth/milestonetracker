@@ -70,7 +70,6 @@ exports.milestones2bytes = function(milestones) {
         return [
             new Buffer(milestone.description),
             new Buffer(milestone.url),
-            n2buff(milestone.amount),
             n2buff(milestone.minDoneDate),
             n2buff(milestone.maxDoneDate),
             milestone.reviewer,
@@ -91,13 +90,12 @@ exports.bytes2milestones = function(b) {
         return {
             description: milestone[0].toString('utf8'),
             url: milestone[1].toString('utf8'),
-            amount: new BigNumber("0x" + milestone[2].toString('hex')),
-            minDoneDate: new BigNumber("0x" + milestone[3].toString('hex')),
-            maxDoneDate: new BigNumber("0x" + milestone[4].toString('hex')),
-            reviewer: '0x' + milestone[5].toString('hex'),
-            reviewTime: new BigNumber("0x" + milestone[6].toString('hex')),
-            payDestination: '0x' + milestone[7].toString('hex'),
-            payData: '0x' + milestone[8].toString('hex')
+            minDoneDate: new BigNumber("0x" + milestone[2].toString('hex')),
+            maxDoneDate: new BigNumber("0x" + milestone[3].toString('hex')),
+            reviewer: '0x' + milestone[4].toString('hex'),
+            reviewTime: new BigNumber("0x" + milestone[5].toString('hex')),
+            payDestination: '0x' + milestone[6].toString('hex'),
+            payData: '0x' + milestone[7].toString('hex')
         };
     });
     return milestones;

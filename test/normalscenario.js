@@ -414,7 +414,6 @@ describe('Normal Scenario Milestone test', function(){
             milestones.push({
                 description: "Proposal " + i,
                 url: "http://url_" + i,
-                amount: 0,
                 minDoneDate: now+86400,
                 maxDoneDate: now+86400*3,
                 reviewer: reviewer,
@@ -463,13 +462,12 @@ describe('Normal Scenario Milestone test', function(){
                             assert.ifError(err);
                             assert.equal(res[0], milestones[i].description);
                             assert.equal(res[1], milestones[i].url);
-                            assert.equal(res[2], milestones[i].amount);
-                            assert.equal(res[3], milestones[i].minDoneDate);
-                            assert.equal(res[4], milestones[i].maxDoneDate);
-                            assert.equal(res[5], milestones[i].reviewer);
-                            assert.equal(res[6], milestones[i].reviewTime);
-                            assert.equal(res[7], milestones[i].payDestination);
-                            assert.equal(res[8], milestones[i].payData);
+                            assert.equal(res[2], milestones[i].minDoneDate);
+                            assert.equal(res[3], milestones[i].maxDoneDate);
+                            assert.equal(res[4], milestones[i].reviewer);
+                            assert.equal(res[5], milestones[i].reviewTime);
+                            assert.equal(res[6], milestones[i].payDestination);
+                            assert.equal(res[7], milestones[i].payData);
                             i++;
                             cb();
                         });
@@ -662,7 +660,6 @@ describe('Normal Scenario Milestone test', function(){
             return {
                 description: milestone.description,
                 url: milestone.url,
-                amount: new BigNumber(milestone.amount).toString(),
                 minDoneDate: new BigNumber(milestone.minDoneDate).toString(),
                 maxDoneDate: new BigNumber(milestone.maxDoneDate).toString(),
                 reviewer: milestone.reviewer,

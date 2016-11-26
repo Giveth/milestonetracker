@@ -30,7 +30,6 @@ contract MilestoneTracker {
     struct Milestone {
         string description;
         string url;
-        uint amount;
         uint minDoneDate;
         uint maxDoneDate;
         address reviewer;
@@ -104,7 +103,6 @@ contract MilestoneTracker {
     //   this fields:
     //       string _description,
     //       string _url,
-    //       uint _amount,
     //       address _payDestination,
     //       bytes _payData,
     //       uint _minDoneDate,
@@ -112,8 +110,8 @@ contract MilestoneTracker {
     //       address _reviewer,
     //       uint _reviewTime
 
-    function proposeMilestones(bytes _newilestones) onlyRecipient campaignNotCancelled {
-        proposedMilestones = _newilestones;
+    function proposeMilestones(bytes _newMilestones) onlyRecipient campaignNotCancelled {
+        proposedMilestones = _newMilestones;
         changingMilestones = true;
     }
 
@@ -156,7 +154,6 @@ contract MilestoneTracker {
 
             milestone.description = itrProposal.next().toAscii();
             milestone.url = itrProposal.next().toAscii();
-            milestone.amount = itrProposal.next().toUint();
             milestone.minDoneDate = itrProposal.next().toUint();
             milestone.maxDoneDate = itrProposal.next().toUint();
             milestone.reviewer = itrProposal.next().toAddress();
@@ -240,7 +237,7 @@ contract MilestoneTracker {
         // Recheck again to not pay 2 times
         if (milestone.status == MilestoneStatus.Paid) throw;
         milestone.status = MilestoneStatus.Paid;
-        milestone.payDestination.call.value(milestone.amount)(milestone.payData);
+        milestone.payDestination.call.value(0)(milestone.payData);
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
