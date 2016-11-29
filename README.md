@@ -1,20 +1,12 @@
-# milestonetracker
+# MilestoneTracker
 
-MailestoneTracker  is a contract between a `donor` and a `recipient`. It tries
-to waranty to the recipient that the work will be payed if the milestones are
-acomplished. And also tries to waranty that the Ether will not be lost if the
-milestones are not acomplished.
+MailestoneTracker is a smart contract between a `donor` and a `recipient`. It ensures that a `recipient` will get paid when they complete the milestones and that the `donor` will receive the money back if the milestones are not completed. However this contract never holds funds and only signals to the vault on when to send ether.
 
-For each milestone, a reviewer is defined. This reviewer can approve or
-reject the work done for a milestone. If the reviewer does not approve or
-reject in during review time, the milestone will be approved automatically.
+For each milestone, a `reviewer` is defined. After the `recipient` signals that they have completed the milestone, this `reviewer` can approve or reject the milestone’s completion. If the `reviewer` takes no action during the defined review time, the milestone will be approved automatically.
 
-This contract also defines an `arbitrator` who can at any moment approve a
-specific milestone or cancel the full campaign.
+This contract also defines an `arbitrator` who can, at any time, approve a specific milestone or cancel the full campaign.
 
-Any of the roles deifined in this contract: `donor`, `recipient`, `reviewer`
-and `aritrator` can be a regular account or a contract like a miltisig or a DAI
-(Decentralized Autonomus Identity).
+All of the roles defined in this contract: `donor`, `recipient`, `reviewer`and `arbitrator` can be a regular account or a contract like a multisig or a DAI (Decentralized Autonomous Identity).
 
 
 ## Constructor
@@ -25,27 +17,23 @@ and `aritrator` can be a regular account or a contract like a miltisig or a DAI
             address _recipient
         )
 
-## Proposing new milestones
+## Proposing New Milestones
 
-To create the milestoneList or to change any thing on this, the `recipient` will
-propose a new list and the `donor` will have to accept it in order for this list
-to take effect.
+To add/remove/edit the milestoneList, the `recipient` needs to propose an entirely new list and the `donor` will have to accept it in order for this list to take effect.
 
-To propose a new list, the donor will call `proposeMilestones` method
+To propose a new list, the `recipient` will call the `proposeMilestones` method
 
     function proposeMilestones(bytes _newMilestones)
 
-The _newMilestones parameter is the RLP encoded list of milestones. This list
-will replace all the previows not completed and paid milestones.
+The _newMilestones parameter is the RLP encoded list of milestones. This list will replace all the previous uncompleted and unpaid milestones.
 
-In js/milestonetacker_helper.js there are the functions `milestones2bytes` and
-`bytes2milestones` to encode a and decode a list of milestones.
+In js/milestonetacker_helper.js there are the functions `milestones2bytes` and `bytes2milestones` which will enable the `recipient` to encode and decode a list of milestones.
 
-To use you can do:
+To use you can run:
 
     npm install milestonestracker
 
-And create a the bytes this way:
+And create the Milestone bytes by filling in the appropriate variables:
 
 
     milestonesTrackerHelper = require('milestonestracker');
@@ -57,7 +45,7 @@ And create a the bytes this way:
 
     var milestonesBytes = milestonesTrackerHelper.milestones2bytes(
         {
-            description: "Milestone 1: Do the web page of the campaig" ,
+            description: "Milestone 1: Build the web page for the campaign" ,
             url: "http://mycampaig.com/milestone1",
             minDoneDate: Math.floor(new Date('2017-01-01').getTime() /1000),
             maxDoneDate: Math.floor(new Date('2017-02-01').getTime() /1000),
@@ -87,58 +75,48 @@ And create a the bytes this way:
         },
     );
 
-Once the milestone is proposed, the `donor` can accept the new list in
-replacement of the old one by calling
+Once the milestone is proposed by the `recipient`, the `donor` can accept the new list and replace the old list by calling
 
     function acceptProposedMilestones(bytes32 hashProposals)
 
-The recipient can also cancel this new proposal and continue with the old one
-by calling
+The `recipient` can also cancel their newly proposed milestoneList and continue with the old milestoneList by calling
 
     function unproposeMilestones()
 
-Diring the time a new milestone list proposal is pending to be approved, all
-current milestones get frizzed and no mileston can set as done or be approved to
-be paid.
+While a new milestoneList proposal is pending to be approved, the current milestones are frozen and can not be approved to be paid.
 
-## Setting the work DONE, review the job and get paid.
+## Completing the Milestones
 
-With the milestone List approved, the recipient can start work on the milestones.
-When he finishes a mileston, he can mark it as DONE by calling:
+After the milestoneList is approved, the `recipient` can mark a milestone as `done` by calling:
 
     function milestoneCompleted(uint _idMilestone)
 
-At this point, the reviewer o`f this milestone can approve or reject the
-miles by calling:
+At this point, the `reviewer` assigned to this milestone can approve or reject the milestone by calling:
 
     function approveMilestone(uint _idMilestone)
 
     function rejectMilestone(uint _idMilestone)
 
-If during the `reviewTime` of the milestone, the `reviewer` didn't say nothing,
-the milestone will be considered approved and the recipent can call.
+If during the `reviewTime` of the milestone, the `reviewer` didn’t call either function the milestone will be considered approved and the `recipient` can call:
 
     function collectMilestone(uint _idMilestone)
 
-In the `approveMilestone` call and in the `collectMilestone` A call is made
-to the `payDestination` with value `amount` Ethers and data `payData`
+When the `approveMilestone` or `collectMilestone` functions are called the `payDestination` is sent the `amount` of wei and the data `payData` is executed.
 
-## Canceling a milestone
+## Canceling a Milestone
 
-The recipient can cancel a milestone at any time if he knows he's not going to
-do the milestone.
+The `recipient` can cancel a milestone at any time if they know they will not complete the milestone.
 
 ## Arbitration
 
-If there is a conflict betwen the reviewer and the recipient, the arbitrator (if
-defined) has the power to force the payment of a miletson.
+If there is a dispute between the `reviewer` and the `recipient`, the `arbitrator` (if
+defined) has the power to force the payment of a milestone.
 
     function arbitrateApproveMilestone(uint _idMilestone)
 
-The arbitrator has also the power to cancel the full campaig by calling
+The `arbitrator` has also the power to cancel the campaign in its entirety by calling
 
     function arbitrateCancelCampaign()
 
-At this point, all the full campaig is canceled.
 
 
