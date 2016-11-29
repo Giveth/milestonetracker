@@ -6,8 +6,8 @@ acomplished. And also tries to waranty that the Ether will not be lost if the
 milestones are not acomplished.
 
 For each milestone, a reviewer is defined. This reviewer can approve or
-disaprove the work done for a milestone. If the reviewer does not approve or
-disapprove in during review time, the milestone will be approved automatically.
+reject the work done for a milestone. If the reviewer does not approve or
+reject in during review time, the milestone will be approved automatically.
 
 This contract also defines an `arbitrator` who can at any moment approve a
 specific milestone or cancel the full campaign.
@@ -108,12 +108,12 @@ When he finishes a mileston, he can mark it as DONE by calling:
 
     function milestoneCompleted(uint _idMilestone)
 
-At this point, the reviewer o`f this milestone can approve or disapprove the
+At this point, the reviewer o`f this milestone can approve or reject the
 miles by calling:
 
     function approveMilestone(uint _idMilestone)
 
-    function disapproveMilestone(uint _idMilestone)
+    function rejectMilestone(uint _idMilestone)
 
 If during the `reviewTime` of the milestone, the `reviewer` didn't say nothing,
 the milestone will be considered approved and the recipent can call.
@@ -133,11 +133,11 @@ do the milestone.
 If there is a conflict betwen the reviewer and the recipient, the arbitrator (if
 defined) has the power to force the payment of a miletson.
 
-    function forceApproveMilestone(uint _idMilestone)
+    function arbitrateApproveMilestone(uint _idMilestone)
 
 The arbitrator has also the power to cancel the full campaig by calling
 
-    function cancelCampaign()
+    function arbitrateCancelCampaign()
 
 At this point, all the full campaig is canceled.
 

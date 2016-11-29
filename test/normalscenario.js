@@ -33,69 +33,69 @@ var proposals = [
         {   // Proposal 0, Step 0
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 1 after propose
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 2
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 0, Step 3
             action: "milestoneCompleted",
             milestoneCompleted:false,
             approveMilestone: true,
-            disapproveMilestone: true,
+            rejectMilestone: true,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 0, Step 4
             action: "approveMilestone",
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false,
+            arbitrateApproveMilestone: false,
             testPayment: true
         },
         {   // Proposal 0, Step 5
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 6
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 7
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         }
     ],
 
@@ -103,71 +103,71 @@ var proposals = [
         {   // Proposal 1, Step 0
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 1, Step 1 after propose
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 1, Step 2
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 1, Step 3
             action: "milestoneCompleted",
             milestoneCompleted:false,
             approveMilestone: true,
-            disapproveMilestone: true,
+            rejectMilestone: true,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 1, Step 4
-            action: "disapproveMilestone",
+            action: "rejectMilestone",
             milestoneCompleted:true,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true,
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 1, Step 5
             action: "milestoneCompleted",
             milestoneCompleted:false,
             approveMilestone: true,
-            disapproveMilestone: true,
+            rejectMilestone: true,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 1, Step 6
             action: "collectMilestone",
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false,
+            arbitrateApproveMilestone: false,
             testPayment: true
         },
         {   // Proposal 1, Step 7
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         }
     ],
 
@@ -176,136 +176,136 @@ var proposals = [
         {   // Proposal 2, Step 0
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 2, Step 1 after propose
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 2, Step 2
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 2, Step 3
             action: "milestoneCompleted",
             milestoneCompleted:false,
             approveMilestone: true,
-            disapproveMilestone: true,
+            rejectMilestone: true,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 2, Step 4
-            action: "disapproveMilestone",
+            action: "rejectMilestone",
             milestoneCompleted:true,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true,
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 2, Step 5
-            action: "forceApproveMilestone",
+            action: "arbitrateApproveMilestone",
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false,
+            arbitrateApproveMilestone: false,
             testPayment: true
         },
         {   // Proposal 2, Step 6
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false,
+            arbitrateApproveMilestone: false,
         },
         {   // Proposal 2, Step 7
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         }
     ],
     [ // Proposal 3
         {   // Proposal 3, Step 0
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 3, Step 1 after propose
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: false,
-            forceApproveMilestone: false
+            arbitrateApproveMilestone: false
         },
         {   // Proposal 3, Step 2
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 3, Step 3
             milestoneCompleted:true,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         },
         {   // Proposal 3, Step 4
             milestoneCompleted:true,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true,
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 5
             milestoneCompleted:true,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true,
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 6
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true,
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 7
             milestoneCompleted:false,
             approveMilestone: false,
-            disapproveMilestone: false,
+            rejectMilestone: false,
             collectMilestone: false,
             cancelMilestone: true,
-            forceApproveMilestone: true
+            arbitrateApproveMilestone: true
         }
     ]
 ];
@@ -347,10 +347,10 @@ describe('Normal Scenario Milestone test', function(){
             caller = {
                 milestoneCompleted: recipient,
                 approveMilestone: reviewer,
-                disapproveMilestone: reviewer,
+                rejectMilestone: reviewer,
                 collectMilestone: recipient,
                 cancelMilestone: recipient,
-                forceApproveMilestone: arbitrator
+                arbitrateApproveMilestone: arbitrator
             };
             done();
         });
@@ -599,10 +599,10 @@ describe('Normal Scenario Milestone test', function(){
             [
                 'milestoneCompleted',
                 'approveMilestone',
-                'disapproveMilestone',
+                'rejectMilestone',
                 'collectMilestone',
                 'cancelMilestone',
-                'forceApproveMilestone'
+                'arbitrateApproveMilestone'
             ],
             function(method,cb) {
                 log("Check Step: " + step + " Proposal: "+proposal+ " Method: " + method);

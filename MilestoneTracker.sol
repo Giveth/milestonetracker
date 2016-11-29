@@ -244,7 +244,7 @@ contract MilestoneTracker {
     /// @notice The reviewer unapproves the milestone. The milestone will change
     ///  back to the `NotDone` state
     /// @param _idMilestone Id of the miletone that is disapproved.
-    function disapproveMilestone(uint _idMilestone) campaignNotCancelled notChanging {
+    function rejectMilestone(uint _idMilestone) campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if ((msg.sender != milestone.reviewer) ||
@@ -283,7 +283,7 @@ contract MilestoneTracker {
     /// @notice Arbitrator forces a milestone to be payed. The milestone can be
     /// in the `notDone` and `done` state.
     /// @param _idMilestone Id of the miletone tah will be payrd.
-    function forceApproveMilestone(uint _idMilestone) onlyArbitrator campaignNotCancelled notChanging {
+    function arbitrateApproveMilestone(uint _idMilestone) onlyArbitrator campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.NotDone) &&
@@ -293,7 +293,7 @@ contract MilestoneTracker {
     }
 
     /// @notice Arbitrator cancels the campaig
-    function cancelCampaign() onlyArbitrator campaignNotCancelled {
+    function arbitrateCancelCampaign() onlyArbitrator campaignNotCancelled {
         campaignCancelled = true;
         CampaignCalncelled();
     }
