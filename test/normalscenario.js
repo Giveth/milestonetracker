@@ -550,23 +550,23 @@ describe('Normal Scenario Milestone test', function(){
     }
 
     function checkPayment(proposal,cb) {
-        var numberOfPayments;
+        var numberOfAuthorizedPayments;
         var payment;
         var i=0;
         async.series([
             function(cb) {
-                vault.numberOfPayments(function(err, res) {
+                vault.numberOfAuthorizedPayments(function(err, res) {
                     assert.ifError(err);
-                    numberOfPayments = res;
+                    numberOfAuthorizedPayments = res;
                     cb();
                 });
             },
             function(cb) {
 
                 async.whilst(
-                    function() { return (i< numberOfPayments)&&(!payment); },
+                    function() { return (i< numberOfAuthorizedPayments)&&(!payment); },
                     function(cb) {
-                        vault.payments(i, function(err, res) {
+                        vault.authorizedPayments(i, function(err, res) {
                             assert.ifError(err);
                             if (res[0] === "Proposal "+i) {
                                 payment = res;
