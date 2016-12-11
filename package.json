@@ -32,6 +32,6 @@
   },
   "homepage": "https://github.com/Giveth/milestonetracker",
   "dependencies": {
-    "vaultcontract": "0.2.0"
+    "vaultcontract": "0.2.2"
   }
 }
