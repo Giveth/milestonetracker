@@ -1,6 +1,6 @@
 {
   "name": "milestonetracker",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Milestone Tracker contract",
   "main": "js/milestonetracker_helper.js",
   "directories": {
@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/Giveth/milestonetracker",
   "dependencies": {
-    "ethconnector": "0.0.18",
-    "vaultcontract": "0.2.2"
+    "ethconnector": "0.0.19",
+    "vaultcontract": "0.2.4"
   }
 }
