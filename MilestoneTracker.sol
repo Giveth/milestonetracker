@@ -334,7 +334,8 @@ contract MilestoneTracker {
         // Recheck again to not pay twice
         if (milestone.status == MilestoneStatus.Paid) throw;
         milestone.status = MilestoneStatus.Paid;
-        milestone.payDestination.call.value(0)(milestone.payData);
+        if (!milestone.payDestination.call.value(0)(milestone.payData))
+            throw;
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 }
