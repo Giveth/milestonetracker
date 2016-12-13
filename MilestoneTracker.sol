@@ -1,3 +1,5 @@
+pragma solidity ^0.4.4;
+
 /*
     Copyright 2016, Jordi Baylina
 
@@ -17,59 +19,72 @@
 
 /// @title MilestoneTracker Contract
 /// @author Jordi Baylina
-/// @dev This contract is rules the relation betwen a donor and a recipient
+/// @dev This contract tracks the  
+
+
+/// is rules the relation betwen a donor and a recipient
 ///  in order to guaranty to the donor that the job will be done and to guaranty
 ///  to the recipient that he will be paid
 
-pragma solidity ^0.4.4;
 
-// We use the RLP library to decode RLP
-// https://github.com/androlo/standard-contracts/blob/master/contracts/src/codec/RLP.sol
+/// @dev We use the RLP library to decode RLP so that the donor can approve one
+///  set of milestone changes at a time.
+///  https://github.com/androlo/standard-contracts/blob/master/contracts/src/codec/RLP.sol
 import "RLP.sol";
 
+
+
+/// @dev This contract allows for `recipient` to set and modify milestones  
 contract MilestoneTracker {
     using RLP for RLP.RLPItem;
     using RLP for RLP.Iterator;
     using RLP for bytes;
 
     struct Milestone {
-        string description;       // Description of the milestone
-        string url;               // Ir can be a link to the swarm gateway
-        uint minDoneDate;         // Minimum date that the DONE work is accepted
-        uint maxDoneDate;         // Max date for the DONE work to be accepted
-        address reviewer;         // Who will review the milestone
-        uint reviewTime;          // How much time has the reviwer to do his job
-        address payDestination;   // When milestone is acceped a call is done to
-        bytes payData;            // `payDastination` with  `payData`
+        string description;     // Description of the milestone
+        string url;             // A link to more information (swarm gateway)
+        uint minDoneDate;       // Earliest UNIX time the milestone can be paid
+        uint maxDoneDate;       // Latest UNIX time the milestone can be paid
+        address reviewer;       // Who will check the milestone has completed
+        uint reviewTime;        // How many seconds the reviewer has to review
+        address payDestination; // Where the milestone payment is sent from
+        bytes payData;          // Data defining how much ether is sent where
 
-        MilestoneStatus status;   // Actual status of the milestone
-        uint doneTime;            // Times stamp of when the milistone is DONE
+        MilestoneStatus status; // Current status of the milestone (Done, Paid...)
+        uint doneTime;          // UNIX time when the milestone was marked DONE 
     }
 
     // The list of all the milestones.
     Milestone[] public milestones;
 
-    address public recipient;    // Actual recipient address
-    address public donor;        // Actual donor address
-    address public arbitrator;   // Actual arbitrator Address
+    address public recipient;   // Calls functions in the name of the recipient 
+    address public donor;       // Calls functions in the name of the donor
+    address public arbitrator   // Calls functions in the name of the arbitrator
 
     enum MilestoneStatus { NotDone, Done, Paid, Cancelled }
 
-    // Truie if the campaign has been cancelled
+    // True if the campaign has been canceled
     bool public campaignCancelled;
 
-    // `true` if there is a pending to approve change on the milestones list
+    // True if an approval on a change to `milestones` is a pending 
     bool public changingMilestones;
 
-    // The pending to approve milestone list RLP encoded
+    // The pending change to `milestones` encoded in RLP
     bytes public proposedMilestones;
 
+
+    /// @dev The following modifiers only allow specific roles to call functions
+    /// with these modifiers
     modifier onlyRecipient { if (msg.sender !=  recipient) throw; _; }
     modifier onlyArbitrator { if (msg.sender != arbitrator) throw; _; }
     modifier onlyDonor { if (msg.sender != donor) throw; _; }
+
+    /// @dev The following modifiers prevent functions from being called if the
+    /// campaign has been canceled or if new milestones are being proposed
     modifier campaignNotCancelled { if (campaignCancelled) throw; _; }
     modifier notChanging { if (changingMilestones) throw; _; }
 
+ // @dev Events to make the payment movements easy to find on the blockchain
     event NewMilestoneListProposed();
     event NewMilestoneListUnproposed();
     event NewMilestoneListAccepted();
@@ -78,13 +93,13 @@ contract MilestoneTracker {
 
 
 ///////////
-// Constuctor
+// Constructor
 ///////////
 
-    /// @notice Constructor
-    /// @param _arbitrator The arbitratorº
-    /// @param _donor The donor
-    /// @param _recipient The recipient
+    /// @notice The Constructor creates the Milestone contract on the blockchain
+    /// @param _arbitrator Address assigned to be the arbitrator
+    /// @param _donor Address assigned to be the donor
+    /// @param _recipient Address assigned to be the recipient
     function MilestoneTracker (
         address _arbitrator,
         address _donor,
@@ -100,7 +115,7 @@ contract MilestoneTracker {
 // Helper functions
 /////////
 
-    /// @notice Return the number of milestones including the cancelled ones.
+    /// @return The number of milestones ever created even if they were canceled
     function numberOfMilestones() constant returns (uint) {
         return milestones.length;
     }
@@ -110,19 +125,19 @@ contract MilestoneTracker {
 // Change players
 ////////
 
-    /// @notice Arbitrator can change the arbitrator
+    /// @notice `onlyArbitrator` Reassigns the arbitrator to a new address
     /// @param _newArbitrator The new arbitrator
     function changeArbitrator(address _newArbitrator) onlyArbitrator {
         arbitrator = _newArbitrator;
     }
 
-    /// @notice The donor can change the donor
+    /// @notice `onlyDonor` Reassigns the `donor` to a new address
     /// @param _newDonor The new donor
     function changeDonor(address _newDonor) onlyDonor {
         donor = _newDonor;
     }
 
-    /// @notice The recipientn can change the recipient
+    /// @notice `onlyRecipient` Reassigns the `recipient` to a new address
     /// @param _newRecipient The new recipient
     function changeRecipient(address _newRecipient) onlyRecipient {
         recipient = _newRecipient;
@@ -133,9 +148,16 @@ contract MilestoneTracker {
 // Creation and modification of Milestones
 ////////////
 
-    /// @notice The recipientn propose a new milestone list
-    /// @param _newMilestones RLP list encoded milestones. Each mileston has
-    ///   this fields:
+    /// @notice `onlyRecipient` Proposes new milestones or changes old
+    ///  milestones, this will require a user interface to be built up to 
+    ///  support this functionality as asks for RLP encoded bytecode to be
+    ///  generated, until this interface is built you can use this script:
+    ///  https://github.com/Giveth/milestonetracker/blob/master/js/milestonetracker_helper.js
+    ///  the functions milestones2bytes and bytes2milestones will enable the 
+    ///  recipient to encode and decode a list of milestones, also see
+    ///  https://github.com/Giveth/milestonetracker/blob/master/README.md
+    /// @param _newMilestones The RLP encoded list of milestones; each milestone
+    ///  has these fields:
     ///       string _description,
     ///       string _url,
     ///       address _payDestination,
@@ -144,7 +166,8 @@ contract MilestoneTracker {
     ///       uint _maxDoneDate,
     ///       address _reviewer,
     ///       uint _reviewTime
-    function proposeMilestones(bytes _newMilestones) onlyRecipient campaignNotCancelled {
+    function proposeMilestones(bytes _newMilestones
+    ) onlyRecipient campaignNotCancelled {
         proposedMilestones = _newMilestones;
         changingMilestones = true;
         NewMilestoneListProposed();
@@ -155,31 +178,33 @@ contract MilestoneTracker {
 // Normal actions that will change the state of the milestones
 ////////////
 
-    /// @notice The recipientn can cancel the proposed milestone list and
-    ///  continue with the old one
+    /// @notice `onlyRecipient` Cancels the proposed milestones and reactivates 
+    ///  the previous set of milestones 
     function unproposeMilestones() onlyRecipient campaignNotCancelled {
         delete proposedMilestones;
         changingMilestones = false;
         NewMilestoneListUnproposed();
     }
 
-    /// @notice The donor accepts the milestone list
-    /// @param _hashProposals sha3() of the proposed bytes that are accepted
-    ///  This parameter is important for the donor to be sure which milestons
-    ///  is he accepting
-    function acceptProposedMilestones(bytes32 _hashProposals) onlyDonor campaignNotCancelled {
+    /// @notice `onlyDonor` Approves the proposed milestone list
+    /// @param _hashProposals The sha3() of the proposed milestone list's
+    ///  bytecode; this confirms that the `donor` knows the set of milestones
+    ///  they are approving
+    function acceptProposedMilestones(bytes32 _hashProposals
+    ) onlyDonor campaignNotCancelled {
 
         uint i;
+
         if (!changingMilestones) throw;
         if (sha3(proposedMilestones) != _hashProposals) throw;
 
-        // Cancel all not finished milestones until now
+        // Cancel all the unfinished milestones
         for (i=0; i<milestones.length; i++) {
             if (milestones[i].status != MilestoneStatus.Paid) {
                 milestones[i].status = MilestoneStatus.Cancelled;
             }
         }
-
+        // Decode the RLP encoded milestones and add them to the milestones list
         bytes memory mProposedMilestones = proposedMilestones;
 
         var itmProposals = mProposedMilestones.toRLPItem(true);
@@ -217,8 +242,32 @@ contract MilestoneTracker {
         NewMilestoneListAccepted();
     }
 
-    /// @notice Recipient marks a milestone as DONE and ready to review.
-    /// @param _idMilestone Id of the miletone that is marked as DONE.
+    /// @notice `onlyReviewer` Approves a specific milestone
+    /// @param _idMilestone ID of the milestone that is approved
+    function approveMilestone(uint _idMilestone) campaignNotCancelled notChanging {
+        if (_idMilestone >= milestones.length) throw;
+        Milestone milestone = milestones[_idMilestone];
+        if ((msg.sender != milestone.reviewer) ||
+            (milestone.status != MilestoneStatus.Done)) throw;
+
+        doPayment(_idMilestone);
+    }
+
+    /// @notice `onlyReviewer` Rejects a specific milestone's completion and 
+    ///  reverts the `milestone.status` back to the `NotDone` state
+    /// @param _idMilestone ID of the milestone that is being rejected
+    function rejectMilestone(uint _idMilestone) campaignNotCancelled notChanging {
+        if (_idMilestone >= milestones.length) throw;
+        Milestone milestone = milestones[_idMilestone];
+        if ((msg.sender != milestone.reviewer) ||
+            (milestone.status != MilestoneStatus.Done)) throw;
+
+        milestone.status = MilestoneStatus.NotDone;
+        ProposalStatusChanged(_idMilestone, milestone.status);
+    }
+
+    /// @notice `onlyRecipient` Marks a milestone as DONE and ready for review
+    /// @param _idMilestone ID of the milestone that has been completed
     function milestoneCompleted(uint _idMilestone) onlyRecipient campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
@@ -230,34 +279,12 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    /// @notice The reviewer approves the milestone
-    /// @param _idMilestone Id of the miletone that is approved.
-    function approveMilestone(uint _idMilestone) campaignNotCancelled notChanging {
-        if (_idMilestone >= milestones.length) throw;
-        Milestone milestone = milestones[_idMilestone];
-        if ((msg.sender != milestone.reviewer) ||
-            (milestone.status != MilestoneStatus.Done)) throw;
-
-        doPayment(_idMilestone);
-    }
-
-    /// @notice The reviewer unapproves the milestone. The milestone will change
-    ///  back to the `NotDone` state
-    /// @param _idMilestone Id of the miletone that is disapproved.
-    function rejectMilestone(uint _idMilestone) campaignNotCancelled notChanging {
-        if (_idMilestone >= milestones.length) throw;
-        Milestone milestone = milestones[_idMilestone];
-        if ((msg.sender != milestone.reviewer) ||
-            (milestone.status != MilestoneStatus.Done)) throw;
-
-        milestone.status = MilestoneStatus.NotDone;
-        ProposalStatusChanged(_idMilestone, milestone.status);
-    }
-
-    /// @notice The recipient claims the milestone when the reviewer did not
-    ///   review the milestone in the `reviewTime` period
-    /// @param _idMilestone Id of the miletone to collect.
-    function collectMilestone(uint _idMilestone) onlyRecipient campaignNotCancelled notChanging {
+    /// @notice `onlyRecipient` Sends the milestone payment as specified in 
+    ///  `payData`; the recipient can only call this after the `reviewTime` has 
+    ///  elapsed
+    /// @param _idMilestone ID of the milestone to be paid out
+    function collectMilestone(uint _idMilestone
+        ) onlyRecipient campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.Done) ||
@@ -267,8 +294,8 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    /// @notice The recipient cancels a milestone.
-    /// @param _idMilestone Id of the miletone to be cancelled.
+    /// @notice `onlyRecipient` Cancels a previously accepted milestone
+    /// @param _idMilestone ID of the milestone to be canceled
     function cancelMilestone(uint _idMilestone) onlyRecipient campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
@@ -280,10 +307,11 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    /// @notice Arbitrator forces a milestone to be payed. The milestone can be
-    /// in the `notDone` and `done` state.
-    /// @param _idMilestone Id of the miletone tah will be payrd.
-    function arbitrateApproveMilestone(uint _idMilestone) onlyArbitrator campaignNotCancelled notChanging {
+    /// @notice `onlyArbitrator` Forces a milestone to be paid out as long as it 
+    /// has not been paid or canceled
+    /// @param _idMilestone ID of the milestone to be paid out
+    function arbitrateApproveMilestone(uint _idMilestone
+    ) onlyArbitrator campaignNotCancelled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.NotDone) &&
@@ -292,17 +320,18 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    /// @notice Arbitrator cancels the campaig
+    /// @notice `onlyArbitrator` Cancels the entire campaign voiding all 
+    ///  milestones vo
     function arbitrateCancelCampaign() onlyArbitrator campaignNotCancelled {
         campaignCancelled = true;
         CampaignCalncelled();
     }
 
-    // This internal function is executed when the mailseton is approved.
+    // @dev This internal function is executed when the milestone is paid out
     function doPayment(uint _idMilestone) internal {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
-        // Recheck again to not pay 2 times
+        // Recheck again to not pay twice
         if (milestone.status == MilestoneStatus.Paid) throw;
         milestone.status = MilestoneStatus.Paid;
         milestone.payDestination.call.value(0)(milestone.payData);
