@@ -19,7 +19,7 @@ pragma solidity ^0.4.4;
 
 /// @title MilestoneTracker Contract
 /// @author Jordi Baylina
-/// @dev This contract tracks the  
+/// @dev This contract tracks the
 
 
 /// is rules the relation betwen a donor and a recipient
@@ -34,7 +34,7 @@ import "RLP.sol";
 
 
 
-/// @dev This contract allows for `recipient` to set and modify milestones  
+/// @dev This contract allows for `recipient` to set and modify milestones
 contract MilestoneTracker {
     using RLP for RLP.RLPItem;
     using RLP for RLP.Iterator;
@@ -51,22 +51,22 @@ contract MilestoneTracker {
         bytes payData;          // Data defining how much ether is sent where
 
         MilestoneStatus status; // Current status of the milestone (Done, Paid...)
-        uint doneTime;          // UNIX time when the milestone was marked DONE 
+        uint doneTime;          // UNIX time when the milestone was marked DONE
     }
 
     // The list of all the milestones.
     Milestone[] public milestones;
 
-    address public recipient;   // Calls functions in the name of the recipient 
+    address public recipient;   // Calls functions in the name of the recipient
     address public donor;       // Calls functions in the name of the donor
-    address public arbitrator   // Calls functions in the name of the arbitrator
+    address public arbitrator;  // Calls functions in the name of the arbitrator
 
     enum MilestoneStatus { NotDone, Done, Paid, Cancelled }
 
     // True if the campaign has been canceled
     bool public campaignCancelled;
 
-    // True if an approval on a change to `milestones` is a pending 
+    // True if an approval on a change to `milestones` is a pending
     bool public changingMilestones;
 
     // The pending change to `milestones` encoded in RLP
@@ -149,11 +149,11 @@ contract MilestoneTracker {
 ////////////
 
     /// @notice `onlyRecipient` Proposes new milestones or changes old
-    ///  milestones, this will require a user interface to be built up to 
+    ///  milestones, this will require a user interface to be built up to
     ///  support this functionality as asks for RLP encoded bytecode to be
     ///  generated, until this interface is built you can use this script:
     ///  https://github.com/Giveth/milestonetracker/blob/master/js/milestonetracker_helper.js
-    ///  the functions milestones2bytes and bytes2milestones will enable the 
+    ///  the functions milestones2bytes and bytes2milestones will enable the
     ///  recipient to encode and decode a list of milestones, also see
     ///  https://github.com/Giveth/milestonetracker/blob/master/README.md
     /// @param _newMilestones The RLP encoded list of milestones; each milestone
@@ -178,8 +178,8 @@ contract MilestoneTracker {
 // Normal actions that will change the state of the milestones
 ////////////
 
-    /// @notice `onlyRecipient` Cancels the proposed milestones and reactivates 
-    ///  the previous set of milestones 
+    /// @notice `onlyRecipient` Cancels the proposed milestones and reactivates
+    ///  the previous set of milestones
     function unproposeMilestones() onlyRecipient campaignNotCancelled {
         delete proposedMilestones;
         changingMilestones = false;
@@ -253,7 +253,7 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    /// @notice `onlyReviewer` Rejects a specific milestone's completion and 
+    /// @notice `onlyReviewer` Rejects a specific milestone's completion and
     ///  reverts the `milestone.status` back to the `NotDone` state
     /// @param _idMilestone ID of the milestone that is being rejected
     function rejectMilestone(uint _idMilestone) campaignNotCancelled notChanging {
@@ -279,8 +279,8 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    /// @notice `onlyRecipient` Sends the milestone payment as specified in 
-    ///  `payData`; the recipient can only call this after the `reviewTime` has 
+    /// @notice `onlyRecipient` Sends the milestone payment as specified in
+    ///  `payData`; the recipient can only call this after the `reviewTime` has
     ///  elapsed
     /// @param _idMilestone ID of the milestone to be paid out
     function collectMilestone(uint _idMilestone
@@ -307,7 +307,7 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    /// @notice `onlyArbitrator` Forces a milestone to be paid out as long as it 
+    /// @notice `onlyArbitrator` Forces a milestone to be paid out as long as it
     /// has not been paid or canceled
     /// @param _idMilestone ID of the milestone to be paid out
     function arbitrateApproveMilestone(uint _idMilestone
@@ -320,7 +320,7 @@ contract MilestoneTracker {
         doPayment(_idMilestone);
     }
 
-    /// @notice `onlyArbitrator` Cancels the entire campaign voiding all 
+    /// @notice `onlyArbitrator` Cancels the entire campaign voiding all
     ///  milestones vo
     function arbitrateCancelCampaign() onlyArbitrator campaignNotCancelled {
         campaignCancelled = true;
