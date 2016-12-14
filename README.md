@@ -40,18 +40,18 @@ And create the Milestone bytes by filling in the appropriate variables:
     var now = Math.floor(new Date().getTime() / 1000);
 
     var reviewer = '0x12345678901234567890123456789012';
-    var payDestination = '0xaabbccddeeff11223344556677889900'
+    var paymentSource = '0xaabbccddeeff11223344556677889900'
 
 
     var milestonesBytes = milestonesTrackerHelper.milestones2bytes(
         {
             description: "Milestone 1: Build the web page for the campaign" ,
             url: "http://mycampaig.com/milestone1",
-            minDoneDate: Math.floor(new Date('2017-01-01').getTime() /1000),
-            maxDoneDate: Math.floor(new Date('2017-02-01').getTime() /1000),
+            minCompletionDate: Math.floor(new Date('2017-01-01').getTime() /1000),
+            maxCompletionDate: Math.floor(new Date('2017-02-01').getTime() /1000),
             reviewer: reviewer,
             reviewTime: 86400*7,
-            payDestination: vault.address,
+            paymentSource: vault.address,
             payData: vault.authorizePayment.getData(
                 "Example Campaign - Proposal 1 ",
                 recipient,
@@ -61,12 +61,11 @@ And create the Milestone bytes by filling in the appropriate variables:
         {
             description: "Milestone 2: Promote SEO" ,
             url: "http://mycampaig.com/milestone2",
-            minDoneDate: Math.floor(new Date('2017-01-15').getTime() /1000),
-            maxDoneDate: Math.floor(new Date('2017-03-01').getTime() /1000),
+            minCompletionDate: Math.floor(new Date('2017-01-15').getTime() /1000),
+            maxCompletionDate: Math.floor(new Date('2017-03-01').getTime() /1000),
             reviewer: reviewer,
             reviewTime: 86400*7,
-            payDestination: recipient,
-            payDestination: vault.address,
+            paymentSource: vault.address,
             payData: vault.authorizePayment.getData(
                 "Example Campaign - Proposal 1 ",
                 recipient,
@@ -93,15 +92,15 @@ After the milestoneList is approved, the `recipient` can mark a milestone as `do
 
 At this point, the `reviewer` assigned to this milestone can approve or reject the milestone by calling:
 
-    function approveMilestone(uint _idMilestone)
+    function approveCompletedMilestone(uint _idMilestone)
 
     function rejectMilestone(uint _idMilestone)
 
 If during the `reviewTime` of the milestone, the `reviewer` didn’t call either function the milestone will be considered approved and the `recipient` can call:
 
-    function collectMilestone(uint _idMilestone)
+    function collectMilestonePayment(uint _idMilestone)
 
-When the `approveMilestone` or `collectMilestone` functions are called the `payDestination` is sent the `amount` of wei and the data `payData` is executed.
+When the `approveCompletedMilestone` or `collectMilestonePayment` functions are called the `paymentSource` is sent the `amount` of wei and the data `payData` is executed.
 
 ## Canceling a Milestone
 

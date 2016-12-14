@@ -19,9 +19,9 @@ var verbose = false;
 Stp 1:  Propose     Propose     Propose     Propose
 Stp 2:  Accept      Accept      Accept      Accept
 --delay--
-Stp 3:  Done        Done        Done
+Stp 3:  Complete    Complete    Complete
 Stp 4:  Approve     Disapprove  Disapprove
-Stp 5:              Done        ForceApprove
+Stp 5:              Complete    ForceApprove
 --delay--
 Stp 6:              Collect
 --delay--
@@ -32,68 +32,68 @@ var proposals = [
     [ // Proposal 0
         {   // Proposal 0, Step 0
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 1 after propose
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 2
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 0, Step 3
             action: "milestoneCompleted",
             milestoneCompleted:false,
-            approveMilestone: true,
+            approveCompletedMilestone: true,
             rejectMilestone: true,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 0, Step 4
-            action: "approveMilestone",
+            action: "approveCompletedMilestone",
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false,
             testPayment: true
         },
         {   // Proposal 0, Step 5
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 6
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 7
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         }
@@ -102,70 +102,70 @@ var proposals = [
     [ // Proposal 1
         {   // Proposal 1, Step 0
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 1, Step 1 after propose
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 1, Step 2
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 1, Step 3
             action: "milestoneCompleted",
             milestoneCompleted:false,
-            approveMilestone: true,
+            approveCompletedMilestone: true,
             rejectMilestone: true,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 1, Step 4
             action: "rejectMilestone",
             milestoneCompleted:true,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 1, Step 5
             action: "milestoneCompleted",
             milestoneCompleted:false,
-            approveMilestone: true,
+            approveCompletedMilestone: true,
             rejectMilestone: true,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 1, Step 6
-            action: "collectMilestone",
+            action: "collectMilestonePayment",
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false,
             testPayment: true
         },
         {   // Proposal 1, Step 7
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         }
@@ -175,69 +175,69 @@ var proposals = [
     [ // Proposal 2
         {   // Proposal 2, Step 0
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 2, Step 1 after propose
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 2, Step 2
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 2, Step 3
             action: "milestoneCompleted",
             milestoneCompleted:false,
-            approveMilestone: true,
+            approveCompletedMilestone: true,
             rejectMilestone: true,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 2, Step 4
             action: "rejectMilestone",
             milestoneCompleted:true,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 2, Step 5
             action: "arbitrateApproveMilestone",
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false,
             testPayment: true
         },
         {   // Proposal 2, Step 6
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false,
         },
         {   // Proposal 2, Step 7
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         }
@@ -245,65 +245,65 @@ var proposals = [
     [ // Proposal 3
         {   // Proposal 3, Step 0
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 3, Step 1 after propose
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false
         },
         {   // Proposal 3, Step 2
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 3, Step 3
             milestoneCompleted:true,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         },
         {   // Proposal 3, Step 4
             milestoneCompleted:true,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 5
             milestoneCompleted:true,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 6
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 7
             milestoneCompleted:false,
-            approveMilestone: false,
+            approveCompletedMilestone: false,
             rejectMilestone: false,
-            collectMilestone: false,
+            collectMilestonePayment: false,
             cancelMilestone: true,
             arbitrateApproveMilestone: true
         }
@@ -346,9 +346,9 @@ describe('Normal Scenario Milestone test', function(){
 
             caller = {
                 milestoneCompleted: recipient,
-                approveMilestone: reviewer,
+                approveCompletedMilestone: reviewer,
                 rejectMilestone: reviewer,
-                collectMilestone: recipient,
+                collectMilestonePayment: recipient,
                 cancelMilestone: recipient,
                 arbitrateApproveMilestone: arbitrator
             };
@@ -414,11 +414,11 @@ describe('Normal Scenario Milestone test', function(){
             milestones.push({
                 description: "Proposal " + i,
                 url: "http://url_" + i,
-                minDoneDate: now+86400,
-                maxDoneDate: now+86400*3,
+                minCompletionDate: now+86400,
+                maxCompletionDate: now+86400*3,
                 reviewer: reviewer,
                 reviewTime: 86400*2,
-                payDestination: vault.address,
+                paymentSource: vault.address,
                 payData: vault.authorizePayment.getData("Proposal " +i, recipient, ethConnector.web3.toWei(i), 0)
             });
         }
@@ -462,11 +462,11 @@ describe('Normal Scenario Milestone test', function(){
                             assert.ifError(err);
                             assert.equal(res[0], milestones[i].description);
                             assert.equal(res[1], milestones[i].url);
-                            assert.equal(res[2], milestones[i].minDoneDate);
-                            assert.equal(res[3], milestones[i].maxDoneDate);
+                            assert.equal(res[2], milestones[i].minCompletionDate);
+                            assert.equal(res[3], milestones[i].maxCompletionDate);
                             assert.equal(res[4], milestones[i].reviewer);
                             assert.equal(res[5], milestones[i].reviewTime);
-                            assert.equal(res[6], milestones[i].payDestination);
+                            assert.equal(res[6], milestones[i].paymentSource);
                             assert.equal(res[7], milestones[i].payData);
                             i++;
                             cb();
@@ -491,7 +491,7 @@ describe('Normal Scenario Milestone test', function(){
         this.timeout(20000);
         checkStep(4,done);
     });
-    it('Step5: Done and force aprove', function(done) {
+    it('Step5: Complete and force aprove', function(done) {
         this.timeout(20000);
         checkStep(5,done);
     });
@@ -584,7 +584,7 @@ describe('Normal Scenario Milestone test', function(){
                 assert.equal(payment[1], milestoneTracker.address);
                 assert(payment[2].toNumber()>=now+86400*3 - 15);
                 assert(payment[2].toNumber()-now<86400*3 + 15);
-                assert.equal(payment[3], false);  // cancelled
+                assert.equal(payment[3], false);  // canceled
                 assert.equal(payment[4], false);  // payed
                 assert.equal(payment[5], recipient);
                 assert.equal(payment[6], ethConnector.web3.toWei(i));
@@ -598,9 +598,9 @@ describe('Normal Scenario Milestone test', function(){
         async.eachSeries(
             [
                 'milestoneCompleted',
-                'approveMilestone',
+                'approveCompletedMilestone',
                 'rejectMilestone',
-                'collectMilestone',
+                'collectMilestonePayment',
                 'cancelMilestone',
                 'arbitrateApproveMilestone'
             ],
@@ -660,11 +660,11 @@ describe('Normal Scenario Milestone test', function(){
             return {
                 description: milestone.description,
                 url: milestone.url,
-                minDoneDate: new BigNumber(milestone.minDoneDate).toString(),
-                maxDoneDate: new BigNumber(milestone.maxDoneDate).toString(),
+                minCompletionDate: new BigNumber(milestone.minCompletionDate).toString(),
+                maxCompletionDate: new BigNumber(milestone.maxCompletionDate).toString(),
                 reviewer: milestone.reviewer,
                 reviewTime: new BigNumber(milestone.reviewTime).toString(),
-                payDestination: milestone.payDestination,
+                paymentSource: milestone.paymentSource,
                 payData: milestone.payData
             };
         });
