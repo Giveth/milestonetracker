@@ -31,7 +31,7 @@ Stp 7:
 var proposals = [
     [ // Proposal 0
         {   // Proposal 0, Step 0
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -39,7 +39,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 1 after propose
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -47,7 +47,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 2
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -55,8 +55,8 @@ var proposals = [
             arbitrateApproveMilestone: true
         },
         {   // Proposal 0, Step 3
-            action: "milestoneCompleted",
-            milestoneCompleted:false,
+            action: "markMilestoneComplete",
+            markMilestoneComplete:false,
             approveCompletedMilestone: true,
             rejectMilestone: true,
             collectMilestonePayment: false,
@@ -65,7 +65,7 @@ var proposals = [
         },
         {   // Proposal 0, Step 4
             action: "approveCompletedMilestone",
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -74,7 +74,7 @@ var proposals = [
             testPayment: true
         },
         {   // Proposal 0, Step 5
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -82,7 +82,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 6
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -90,7 +90,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 0, Step 7
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -101,7 +101,7 @@ var proposals = [
 
     [ // Proposal 1
         {   // Proposal 1, Step 0
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -109,7 +109,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 1, Step 1 after propose
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -117,7 +117,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 1, Step 2
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -125,8 +125,8 @@ var proposals = [
             arbitrateApproveMilestone: true
         },
         {   // Proposal 1, Step 3
-            action: "milestoneCompleted",
-            milestoneCompleted:false,
+            action: "markMilestoneComplete",
+            markMilestoneComplete:false,
             approveCompletedMilestone: true,
             rejectMilestone: true,
             collectMilestonePayment: false,
@@ -135,7 +135,7 @@ var proposals = [
         },
         {   // Proposal 1, Step 4
             action: "rejectMilestone",
-            milestoneCompleted:true,
+            markMilestoneComplete:true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -143,8 +143,8 @@ var proposals = [
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 1, Step 5
-            action: "milestoneCompleted",
-            milestoneCompleted:false,
+            action: "markMilestoneComplete",
+            markMilestoneComplete:false,
             approveCompletedMilestone: true,
             rejectMilestone: true,
             collectMilestonePayment: false,
@@ -153,7 +153,7 @@ var proposals = [
         },
         {   // Proposal 1, Step 6
             action: "collectMilestonePayment",
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -162,7 +162,7 @@ var proposals = [
             testPayment: true
         },
         {   // Proposal 1, Step 7
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -174,7 +174,7 @@ var proposals = [
 
     [ // Proposal 2
         {   // Proposal 2, Step 0
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -182,7 +182,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 2, Step 1 after propose
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -190,7 +190,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 2, Step 2
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -198,8 +198,8 @@ var proposals = [
             arbitrateApproveMilestone: true
         },
         {   // Proposal 2, Step 3
-            action: "milestoneCompleted",
-            milestoneCompleted:false,
+            action: "markMilestoneComplete",
+            markMilestoneComplete:false,
             approveCompletedMilestone: true,
             rejectMilestone: true,
             collectMilestonePayment: false,
@@ -208,7 +208,7 @@ var proposals = [
         },
         {   // Proposal 2, Step 4
             action: "rejectMilestone",
-            milestoneCompleted:true,
+            markMilestoneComplete:true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -217,7 +217,7 @@ var proposals = [
         },
         {   // Proposal 2, Step 5
             action: "arbitrateApproveMilestone",
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -226,7 +226,7 @@ var proposals = [
             testPayment: true
         },
         {   // Proposal 2, Step 6
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -234,7 +234,7 @@ var proposals = [
             arbitrateApproveMilestone: false,
         },
         {   // Proposal 2, Step 7
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -244,7 +244,7 @@ var proposals = [
     ],
     [ // Proposal 3
         {   // Proposal 3, Step 0
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -252,7 +252,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 3, Step 1 after propose
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -260,7 +260,7 @@ var proposals = [
             arbitrateApproveMilestone: false
         },
         {   // Proposal 3, Step 2
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -268,7 +268,7 @@ var proposals = [
             arbitrateApproveMilestone: true
         },
         {   // Proposal 3, Step 3
-            milestoneCompleted:true,
+            markMilestoneComplete:true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -276,7 +276,7 @@ var proposals = [
             arbitrateApproveMilestone: true
         },
         {   // Proposal 3, Step 4
-            milestoneCompleted:true,
+            markMilestoneComplete:true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -284,7 +284,7 @@ var proposals = [
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 5
-            milestoneCompleted:true,
+            markMilestoneComplete:true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -292,7 +292,7 @@ var proposals = [
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 6
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -300,7 +300,7 @@ var proposals = [
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 7
-            milestoneCompleted:false,
+            markMilestoneComplete:false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             collectMilestonePayment: false,
@@ -325,6 +325,7 @@ describe('Normal Scenario Milestone test', function(){
     var arbitrator;
     var donor;
     var reviewer;
+    var responsable;
 
     var milestonesBytes;
     var milestones;
@@ -343,12 +344,13 @@ describe('Normal Scenario Milestone test', function(){
             arbitrator = owner;
             donor =ethConnector.accounts[7];
             reviewer = ethConnector.accounts[8];
+            responsable = ethConnector.accounts[9];
 
             caller = {
-                milestoneCompleted: recipient,
+                markMilestoneComplete: responsable,
                 approveCompletedMilestone: reviewer,
                 rejectMilestone: reviewer,
-                collectMilestonePayment: recipient,
+                collectMilestonePayment: responsable,
                 cancelMilestone: recipient,
                 arbitrateApproveMilestone: arbitrator
             };
@@ -417,6 +419,7 @@ describe('Normal Scenario Milestone test', function(){
                 minCompletionDate: now+86400,
                 maxCompletionDate: now+86400*3,
                 reviewer: reviewer,
+                responsable: responsable,
                 reviewTime: 86400*2,
                 paymentSource: vault.address,
                 payData: vault.authorizePayment.getData("Proposal " +i, recipient, ethConnector.web3.toWei(i), 0)
@@ -464,10 +467,11 @@ describe('Normal Scenario Milestone test', function(){
                             assert.equal(res[1], milestones[i].url);
                             assert.equal(res[2], milestones[i].minCompletionDate);
                             assert.equal(res[3], milestones[i].maxCompletionDate);
-                            assert.equal(res[4], milestones[i].reviewer);
-                            assert.equal(res[5], milestones[i].reviewTime);
-                            assert.equal(res[6], milestones[i].paymentSource);
-                            assert.equal(res[7], milestones[i].payData);
+                            assert.equal(res[4], milestones[i].responsable);
+                            assert.equal(res[5], milestones[i].reviewer);
+                            assert.equal(res[6], milestones[i].reviewTime);
+                            assert.equal(res[7], milestones[i].paymentSource);
+                            assert.equal(res[8], milestones[i].payData);
                             i++;
                             cb();
                         });
@@ -597,7 +601,7 @@ describe('Normal Scenario Milestone test', function(){
 
         async.eachSeries(
             [
-                'milestoneCompleted',
+                'markMilestoneComplete',
                 'approveCompletedMilestone',
                 'rejectMilestone',
                 'collectMilestonePayment',
@@ -662,6 +666,7 @@ describe('Normal Scenario Milestone test', function(){
                 url: milestone.url,
                 minCompletionDate: new BigNumber(milestone.minCompletionDate).toString(),
                 maxCompletionDate: new BigNumber(milestone.maxCompletionDate).toString(),
+                responsable: milestone.responsable,
                 reviewer: milestone.reviewer,
                 reviewTime: new BigNumber(milestone.reviewTime).toString(),
                 paymentSource: milestone.paymentSource,

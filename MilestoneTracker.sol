@@ -43,14 +43,18 @@ contract MilestoneTracker {
     struct Milestone {
         string description;     // Description of the milestone
         string url;             // A link to more information (swarm gateway)
-        uint minCompletionDate;       // Earliest UNIX time the milestone can be paid
-        uint maxCompletionDate;       // Latest UNIX time the milestone can be paid
-        address reviewer;       // Who will check the milestone has completed
+        uint minCompletionDate; // Earliest UNIX time the milestone can be paid
+        uint maxCompletionDate; // Latest UNIX time the milestone can be paid
+        address responsable;    // Can also mark the milestone to done
+        address reviewer;       // Who can act as the recipient for this
+                                // milestone. Can mark the milestone as
+                                // completed and collect
         uint reviewTime;        // How many seconds the reviewer has to review
         address paymentSource;  // Where the milestone payment is sent from
         bytes payData;          // Data defining how much ether is sent where
 
-        MilestoneStatus status; // Current status of the milestone (Completed, Paid...)
+        MilestoneStatus status; // Current status of the milestone
+                                // (Completed, AuthorizedForPayment...)
         uint doneTime;          // UNIX time when the milestone was marked DONE
     }
 
@@ -61,7 +65,12 @@ contract MilestoneTracker {
     address public donor;       // Calls functions in the name of the donor
     address public arbitrator;  // Calls functions in the name of the arbitrator
 
-    enum MilestoneStatus { AcceptedAndInProgress, Completed, Paid, Canceled }
+    enum MilestoneStatus {
+        AcceptedAndInProgress,
+        Completed,
+        AuthorizedForPayment,
+        Canceled
+    }
 
     // True if the campaign has been canceled
     bool public campaignCanceled;
@@ -160,12 +169,13 @@ contract MilestoneTracker {
     ///  has these fields:
     ///       string description,
     ///       string url,
-    ///       address paymentSource,
-    ///       bytes payData,
-    ///       uint minCompletionDate,
-    ///       uint maxCompletionDate,
+    ///       uint minCompletionDate,  // seconds since 1/1/1970
+    ///       uint maxCompletionDate,  // seconds since 1/1/1970
+    ///       address responsable,
     ///       address reviewer,
     ///       uint reviewTime
+    ///       address paymentSource,
+    ///       bytes payData,
     function proposeMilestones(bytes _newMilestones
     ) onlyRecipient campaignNotCanceled {
         proposedMilestones = _newMilestones;
@@ -200,7 +210,7 @@ contract MilestoneTracker {
 
         // Cancel all the unfinished milestones
         for (i=0; i<milestones.length; i++) {
-            if (milestones[i].status != MilestoneStatus.Paid) {
+            if (milestones[i].status != MilestoneStatus.AuthorizedForPayment) {
                 milestones[i].status = MilestoneStatus.Canceled;
             }
         }
@@ -228,6 +238,7 @@ contract MilestoneTracker {
             milestone.url = itrProposal.next().toAscii();
             milestone.minCompletionDate = itrProposal.next().toUint();
             milestone.maxCompletionDate = itrProposal.next().toUint();
+            milestone.responsable = itrProposal.next().toAddress();
             milestone.reviewer = itrProposal.next().toAddress();
             milestone.reviewTime = itrProposal.next().toUint();
             milestone.paymentSource = itrProposal.next().toAddress();
@@ -242,9 +253,28 @@ contract MilestoneTracker {
         NewMilestoneListAccepted();
     }
 
+    /// @notice `onlyRecipient` Marks a milestone as DONE and ready for review
+    /// @param _idMilestone ID of the milestone that has been completed
+    function markMilestoneComplete(uint _idMilestone)
+        campaignNotCanceled notChanging
+    {
+        if (_idMilestone >= milestones.length) throw;
+        Milestone milestone = milestones[_idMilestone];
+        if ((msg.sender != milestone.responsable)&&(msg.sender != recipient))
+            throw;
+        if (milestone.status != MilestoneStatus.AcceptedAndInProgress) throw;
+        if (now < milestone.minCompletionDate) throw;
+        if (now > milestone.maxCompletionDate) throw;
+        milestone.status = MilestoneStatus.Completed;
+        milestone.doneTime = now;
+        ProposalStatusChanged(_idMilestone, milestone.status);
+    }
+
     /// @notice `onlyReviewer` Approves a specific milestone
     /// @param _idMilestone ID of the milestone that is approved
-    function approveCompletedMilestone(uint _idMilestone) campaignNotCanceled notChanging {
+    function approveCompletedMilestone(uint _idMilestone)
+        campaignNotCanceled notChanging
+    {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if ((msg.sender != milestone.reviewer) ||
@@ -254,9 +284,12 @@ contract MilestoneTracker {
     }
 
     /// @notice `onlyReviewer` Rejects a specific milestone's completion and
-    ///  reverts the `milestone.status` back to the `AcceptedAndInProgress` state
+    ///  reverts the `milestone.status` back to the `AcceptedAndInProgress`
+    ///  state
     /// @param _idMilestone ID of the milestone that is being rejected
-    function rejectMilestone(uint _idMilestone) campaignNotCanceled notChanging {
+    function rejectMilestone(uint _idMilestone)
+        campaignNotCanceled notChanging
+    {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if ((msg.sender != milestone.reviewer) ||
@@ -266,27 +299,16 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    /// @notice `onlyRecipient` Marks a milestone as DONE and ready for review
-    /// @param _idMilestone ID of the milestone that has been completed
-    function milestoneCompleted(uint _idMilestone) onlyRecipient campaignNotCanceled notChanging {
-        if (_idMilestone >= milestones.length) throw;
-        Milestone milestone = milestones[_idMilestone];
-        if (milestone.status != MilestoneStatus.AcceptedAndInProgress) throw;
-        if (now < milestone.minCompletionDate) throw;
-        if (now > milestone.maxCompletionDate) throw;
-        milestone.status = MilestoneStatus.Completed;
-        milestone.doneTime = now;
-        ProposalStatusChanged(_idMilestone, milestone.status);
-    }
-
     /// @notice `onlyRecipient` Sends the milestone payment as specified in
     ///  `payData`; the recipient can only call this after the `reviewTime` has
     ///  elapsed
     /// @param _idMilestone ID of the milestone to be paid out
     function collectMilestonePayment(uint _idMilestone
-        ) onlyRecipient campaignNotCanceled notChanging {
+        ) campaignNotCanceled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
+        if ((msg.sender != milestone.responsable)&&(msg.sender != recipient))
+            throw;
         if  ((milestone.status != MilestoneStatus.Completed) ||
              (now < milestone.doneTime + milestone.reviewTime))
             throw;
@@ -296,7 +318,9 @@ contract MilestoneTracker {
 
     /// @notice `onlyRecipient` Cancels a previously accepted milestone
     /// @param _idMilestone ID of the milestone to be canceled
-    function cancelMilestone(uint _idMilestone) onlyRecipient campaignNotCanceled notChanging {
+    function cancelMilestone(uint _idMilestone)
+        onlyRecipient campaignNotCanceled notChanging
+    {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         if  ((milestone.status != MilestoneStatus.AcceptedAndInProgress) &&
@@ -332,8 +356,8 @@ contract MilestoneTracker {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         // Recheck again to not pay twice
-        if (milestone.status == MilestoneStatus.Paid) throw;
-        milestone.status = MilestoneStatus.Paid;
+        if (milestone.status == MilestoneStatus.AuthorizedForPayment) throw;
+        milestone.status = MilestoneStatus.AuthorizedForPayment;
         if (!milestone.paymentSource.call.value(0)(milestone.payData))
             throw;
         ProposalStatusChanged(_idMilestone, milestone.status);
