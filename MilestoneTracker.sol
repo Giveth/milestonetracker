@@ -41,14 +41,12 @@ contract MilestoneTracker {
     using RLP for bytes;
 
     struct Milestone {
-        string description;     // Description of the milestone
+        string description;     // Description of this milestone
         string url;             // A link to more information (swarm gateway)
         uint minCompletionDate; // Earliest UNIX time the milestone can be paid
         uint maxCompletionDate; // Latest UNIX time the milestone can be paid
-        address responsable;    // Can also mark the milestone to done
-        address reviewer;       // Who can act as the recipient for this
-                                // milestone. Can mark the milestone as
-                                // completed and collect
+        address responsable;    // Similar to `recipient`but for this milestone
+        address reviewer;       // Can reject the completion of this milestone
         uint reviewTime;        // How many seconds the reviewer has to review
         address paymentSource;  // Where the milestone payment is sent from
         bytes payData;          // Data defining how much ether is sent where
@@ -169,8 +167,8 @@ contract MilestoneTracker {
     ///  has these fields:
     ///       string description,
     ///       string url,
-    ///       uint minCompletionDate,  // seconds since 1/1/1970
-    ///       uint maxCompletionDate,  // seconds since 1/1/1970
+    ///       uint minCompletionDate,  // seconds since 1/1/1970 (UNIX time)
+    ///       uint maxCompletionDate,  // seconds since 1/1/1970 (UNIX time)
     ///       address responsable,
     ///       address reviewer,
     ///       uint reviewTime
@@ -253,7 +251,8 @@ contract MilestoneTracker {
         NewMilestoneListAccepted();
     }
 
-    /// @notice `onlyRecipient` Marks a milestone as DONE and ready for review
+    /// @notice `onlyRecipientOrLeadLink`Marks a milestone as DONE and
+    ///  ready for review
     /// @param _idMilestone ID of the milestone that has been completed
     function markMilestoneComplete(uint _idMilestone)
         campaignNotCanceled notChanging
@@ -299,9 +298,9 @@ contract MilestoneTracker {
         ProposalStatusChanged(_idMilestone, milestone.status);
     }
 
-    /// @notice `onlyRecipient` Sends the milestone payment as specified in
-    ///  `payData`; the recipient can only call this after the `reviewTime` has
-    ///  elapsed
+    /// @notice `onlyRecipientOrLeadLink` Sends the milestone payment as
+    ///  specified in `payData`; the recipient can only call this after the
+    ///  `reviewTime` has elapsed
     /// @param _idMilestone ID of the milestone to be paid out
     function collectMilestonePayment(uint _idMilestone
         ) campaignNotCanceled notChanging {
