@@ -28,7 +28,7 @@ _recipient Address that acts in the name the recipients of the ether upon comple
 
 ## Proposing New Milestones
 
-To add/remove/edit the `milestoneList`, the `recipient` needs to propose an entirely new list of Milestones and the `donor` will have to accept it in order for this new list to take effect.
+To add/remove/edit the `milestoneList`, the `recipient` needs to propose an entirely new list of Milestones and the `donor` will have to accept it in order for this new list to take effect. With the current block limit set to 4 million gas, each milestone tracker contract can only manage about 8 active milestones at any given time.
 
 While a new `milestoneList` is pending to be approved, the current Milestones are frozen and can not be approved to be paid.
 
