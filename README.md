@@ -42,7 +42,7 @@ Soon a UI will allow new milestones to be proposed easily, but for now it must b
 
 Before actually encoding the list of Milestones, it is important to have specific details defined, as they will be needed for each Milestone:
 
-1. description: A detailed description of the Milestone, ideally all important information is laid our transparently in this description, including the Payment Amount, the person/group receiving the payment and the requirements.
+1. description: A detailed description of the Milestone, ideally all important information is laid out transparently in this description, including the payment amount, the person/group receiving the payment and the expectations of what it takes to complete this milestone.
 
 2. url: A website that has more information about this Milestone, potentially a Swarm gateway.
 
@@ -50,7 +50,7 @@ Before actually encoding the list of Milestones, it is important to have specifi
 
 4. maxCompletionDate: The latest UNIX time the Milestone can be authorized for payment.
 
-5. milestoneLeadLink: An address that can mark the Milestone complete along with the `recipient`. Normally this will be the address that receives payment in `payData` and the address in charge of actually completing the Milestone.  
+5. milestoneLeadLink: An address that can mark the Milestone complete along with the `recipient`. Normally this will be the address that receives payment in `payData` and the person/group resposible for actually completing the Milestone.  
 
 6. reviewer: The address is in charge of rejecting or approving that the Milestone has actually been completed after the `recipient` or the `milestoneLeadLink` have marked it complete.
 
@@ -156,11 +156,11 @@ The `recipient` can cancel a Milestone at any time if they know they will not co
 
 ## Arbitration
 
-If there is a dispute between the `reviewer` and the `recipient`, the `arbitrator` (if defined) has the power to authorize of payment a Milestone by calling:
+If there is a dispute between the `reviewer` and the `recipient`, the `arbitrator` (if defined) has the power to authorize the payment a Milestone by calling:
 
     function arbitrateApproveMilestone(uint _idMilestone)
 
-The `arbitrator` also has the power to cancel the campaign in its entirety by calling:
+The `arbitrator` also has the power to cancel the campaign in its entirety, preventing any more actions from taking place using this Milestone Tracker contract by calling:
 
     function arbitrateCancelCampaign()
 
