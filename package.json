@@ -1,6 +1,6 @@
 {
   "name": "milestonetracker",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Milestone Tracker contract",
   "main": "js/milestonetracker_helper.js",
   "directories": {

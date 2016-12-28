@@ -45,7 +45,8 @@ contract MilestoneTracker {
         string url;             // A link to more information (swarm gateway)
         uint minCompletionDate; // Earliest UNIX time the milestone can be paid
         uint maxCompletionDate; // Latest UNIX time the milestone can be paid
-        address responsable;    // Similar to `recipient`but for this milestone
+        address milestoneLeadLink;
+                                // Similar to `recipient`but for this milestone
         address reviewer;       // Can reject the completion of this milestone
         uint reviewTime;        // How many seconds the reviewer has to review
         address paymentSource;  // Where the milestone payment is sent from
@@ -96,7 +97,7 @@ contract MilestoneTracker {
     event NewMilestoneListUnproposed();
     event NewMilestoneListAccepted();
     event ProposalStatusChanged(uint idProposal, MilestoneStatus newProposal);
-    event CampaignCalncelled();
+    event CampaignCanceled();
 
 
 ///////////
@@ -169,7 +170,7 @@ contract MilestoneTracker {
     ///       string url,
     ///       uint minCompletionDate,  // seconds since 1/1/1970 (UNIX time)
     ///       uint maxCompletionDate,  // seconds since 1/1/1970 (UNIX time)
-    ///       address responsable,
+    ///       address milestoneLeadLink,
     ///       address reviewer,
     ///       uint reviewTime
     ///       address paymentSource,
@@ -236,7 +237,7 @@ contract MilestoneTracker {
             milestone.url = itrProposal.next().toAscii();
             milestone.minCompletionDate = itrProposal.next().toUint();
             milestone.maxCompletionDate = itrProposal.next().toUint();
-            milestone.responsable = itrProposal.next().toAddress();
+            milestone.milestoneLeadLink = itrProposal.next().toAddress();
             milestone.reviewer = itrProposal.next().toAddress();
             milestone.reviewTime = itrProposal.next().toUint();
             milestone.paymentSource = itrProposal.next().toAddress();
@@ -259,7 +260,8 @@ contract MilestoneTracker {
     {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
-        if ((msg.sender != milestone.responsable)&&(msg.sender != recipient))
+        if (  (msg.sender != milestone.milestoneLeadLink)
+            &&(msg.sender != recipient))
             throw;
         if (milestone.status != MilestoneStatus.AcceptedAndInProgress) throw;
         if (now < milestone.minCompletionDate) throw;
@@ -279,7 +281,7 @@ contract MilestoneTracker {
         if ((msg.sender != milestone.reviewer) ||
             (milestone.status != MilestoneStatus.Completed)) throw;
 
-        doPayment(_idMilestone);
+        authorizePayment(_idMilestone);
     }
 
     /// @notice `onlyReviewer` Rejects a specific milestone's completion and
@@ -302,17 +304,18 @@ contract MilestoneTracker {
     ///  specified in `payData`; the recipient can only call this after the
     ///  `reviewTime` has elapsed
     /// @param _idMilestone ID of the milestone to be paid out
-    function collectMilestonePayment(uint _idMilestone
+    function requestMilestonePayment(uint _idMilestone
         ) campaignNotCanceled notChanging {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
-        if ((msg.sender != milestone.responsable)&&(msg.sender != recipient))
+        if (  (msg.sender != milestone.milestoneLeadLink)
+            &&(msg.sender != recipient))
             throw;
         if  ((milestone.status != MilestoneStatus.Completed) ||
              (now < milestone.doneTime + milestone.reviewTime))
             throw;
 
-        doPayment(_idMilestone);
+        authorizePayment(_idMilestone);
     }
 
     /// @notice `onlyRecipient` Cancels a previously accepted milestone
@@ -340,18 +343,18 @@ contract MilestoneTracker {
         if  ((milestone.status != MilestoneStatus.AcceptedAndInProgress) &&
              (milestone.status != MilestoneStatus.Completed))
            throw;
-        doPayment(_idMilestone);
+        authorizePayment(_idMilestone);
     }
 
     /// @notice `onlyArbitrator` Cancels the entire campaign voiding all
     ///  milestones vo
     function arbitrateCancelCampaign() onlyArbitrator campaignNotCanceled {
         campaignCanceled = true;
-        CampaignCalncelled();
+        CampaignCanceled();
     }
 
     // @dev This internal function is executed when the milestone is paid out
-    function doPayment(uint _idMilestone) internal {
+    function authorizePayment(uint _idMilestone) internal {
         if (_idMilestone >= milestones.length) throw;
         Milestone milestone = milestones[_idMilestone];
         // Recheck again to not pay twice
