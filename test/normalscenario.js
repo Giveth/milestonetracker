@@ -1,18 +1,13 @@
-/*jslint node: true */
-/*global describe, it, before, beforeEach, after, afterEach */
-"use strict";
+import ethConnector from "ethconnector";
+import Vault from "vaultcontract";
+import BigNumber from "bignumber.js";
+import assert from "assert"; // node.js core module
+import async from "async";
+import _ from "lodash";
 
-var ethConnector = require('ethconnector');
-var milestoneTrackerHelper = require('../js/milestonetracker_helper.js');
-var vaultHelper = require('vaultcontract');
-var BigNumber = require('bignumber.js');
+import MilestoneTracker from "../js/milestonetracker";
 
-
-var assert = require("assert"); // node.js core module
-var async = require('async');
-var _ = require('lodash');
-
-var verbose = false;
+const verbose = false;
 
 /* SCHEMA OF THE TEST
         Prop: 0     Prop: 1     Prop: 2     Prop: 3
@@ -28,114 +23,114 @@ Stp 6:              Collect
 Stp 7:
 */
 
-var proposals = [
+const proposals = [
     [ // Proposal 0
         {   // Proposal 0, Step 0
-            markMilestoneComplete:false,
-            approveCompletedMilestone: false,
-            rejectMilestone: false,
-            requestMilestonePayment: false,
-            cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        },
-        {   // Proposal 0, Step 1 after propose
-            markMilestoneComplete:false,
-            approveCompletedMilestone: false,
-            rejectMilestone: false,
-            requestMilestonePayment: false,
-            cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        },
-        {   // Proposal 0, Step 2
-            markMilestoneComplete:false,
-            approveCompletedMilestone: false,
-            rejectMilestone: false,
-            requestMilestonePayment: false,
-            cancelMilestone: true,
-            arbitrateApproveMilestone: true
-        },
-        {   // Proposal 0, Step 3
-            action: "markMilestoneComplete",
-            markMilestoneComplete:false,
-            approveCompletedMilestone: true,
-            rejectMilestone: true,
-            requestMilestonePayment: false,
-            cancelMilestone: true,
-            arbitrateApproveMilestone: true
-        },
-        {   // Proposal 0, Step 4
-            action: "approveCompletedMilestone",
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false,
-            testPayment: true
         },
-        {   // Proposal 0, Step 5
-            markMilestoneComplete:false,
+        {   // Proposal 0, Step 1 after propose
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
-            arbitrateApproveMilestone: false
+            arbitrateApproveMilestone: false,
         },
-        {   // Proposal 0, Step 6
-            markMilestoneComplete:false,
-            approveCompletedMilestone: false,
-            rejectMilestone: false,
-            requestMilestonePayment: false,
-            cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        },
-        {   // Proposal 0, Step 7
-            markMilestoneComplete:false,
-            approveCompletedMilestone: false,
-            rejectMilestone: false,
-            requestMilestonePayment: false,
-            cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        }
-    ],
-
-    [ // Proposal 1
-        {   // Proposal 1, Step 0
-            markMilestoneComplete:false,
-            approveCompletedMilestone: false,
-            rejectMilestone: false,
-            requestMilestonePayment: false,
-            cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        },
-        {   // Proposal 1, Step 1 after propose
-            markMilestoneComplete:false,
-            approveCompletedMilestone: false,
-            rejectMilestone: false,
-            requestMilestonePayment: false,
-            cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        },
-        {   // Proposal 1, Step 2
-            markMilestoneComplete:false,
+        {   // Proposal 0, Step 2
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
+            arbitrateApproveMilestone: true,
         },
-        {   // Proposal 1, Step 3
+        {   // Proposal 0, Step 3
             action: "markMilestoneComplete",
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: true,
             rejectMilestone: true,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
+            arbitrateApproveMilestone: true,
+        },
+        {   // Proposal 0, Step 4
+            action: "approveCompletedMilestone",
+            markMilestoneComplete: false,
+            approveCompletedMilestone: false,
+            rejectMilestone: false,
+            requestMilestonePayment: false,
+            cancelMilestone: false,
+            arbitrateApproveMilestone: false,
+            testPayment: true,
+        },
+        {   // Proposal 0, Step 5
+            markMilestoneComplete: false,
+            approveCompletedMilestone: false,
+            rejectMilestone: false,
+            requestMilestonePayment: false,
+            cancelMilestone: false,
+            arbitrateApproveMilestone: false,
+        },
+        {   // Proposal 0, Step 6
+            markMilestoneComplete: false,
+            approveCompletedMilestone: false,
+            rejectMilestone: false,
+            requestMilestonePayment: false,
+            cancelMilestone: false,
+            arbitrateApproveMilestone: false,
+        },
+        {   // Proposal 0, Step 7
+            markMilestoneComplete: false,
+            approveCompletedMilestone: false,
+            rejectMilestone: false,
+            requestMilestonePayment: false,
+            cancelMilestone: false,
+            arbitrateApproveMilestone: false,
+        },
+    ],
+
+    [ // Proposal 1
+        {   // Proposal 1, Step 0
+            markMilestoneComplete: false,
+            approveCompletedMilestone: false,
+            rejectMilestone: false,
+            requestMilestonePayment: false,
+            cancelMilestone: false,
+            arbitrateApproveMilestone: false,
+        },
+        {   // Proposal 1, Step 1 after propose
+            markMilestoneComplete: false,
+            approveCompletedMilestone: false,
+            rejectMilestone: false,
+            requestMilestonePayment: false,
+            cancelMilestone: false,
+            arbitrateApproveMilestone: false,
+        },
+        {   // Proposal 1, Step 2
+            markMilestoneComplete: false,
+            approveCompletedMilestone: false,
+            rejectMilestone: false,
+            requestMilestonePayment: false,
+            cancelMilestone: true,
+            arbitrateApproveMilestone: true,
+        },
+        {   // Proposal 1, Step 3
+            action: "markMilestoneComplete",
+            markMilestoneComplete: false,
+            approveCompletedMilestone: true,
+            rejectMilestone: true,
+            requestMilestonePayment: false,
+            cancelMilestone: true,
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 1, Step 4
             action: "rejectMilestone",
-            markMilestoneComplete:true,
+            markMilestoneComplete: true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
@@ -144,71 +139,69 @@ var proposals = [
         },
         {   // Proposal 1, Step 5
             action: "markMilestoneComplete",
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: true,
             rejectMilestone: true,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 1, Step 6
             action: "requestMilestonePayment",
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false,
-            testPayment: true
+            testPayment: true,
         },
         {   // Proposal 1, Step 7
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        }
+            arbitrateApproveMilestone: false,
+        },
     ],
-
-
     [ // Proposal 2
         {   // Proposal 2, Step 0
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
-            arbitrateApproveMilestone: false
+            arbitrateApproveMilestone: false,
         },
         {   // Proposal 2, Step 1 after propose
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
-            arbitrateApproveMilestone: false
+            arbitrateApproveMilestone: false,
         },
         {   // Proposal 2, Step 2
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 2, Step 3
             action: "markMilestoneComplete",
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: true,
             rejectMilestone: true,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 2, Step 4
             action: "rejectMilestone",
-            markMilestoneComplete:true,
+            markMilestoneComplete: true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
@@ -217,16 +210,16 @@ var proposals = [
         },
         {   // Proposal 2, Step 5
             action: "arbitrateApproveMilestone",
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
             arbitrateApproveMilestone: false,
-            testPayment: true
+            testPayment: true,
         },
         {   // Proposal 2, Step 6
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
@@ -234,49 +227,49 @@ var proposals = [
             arbitrateApproveMilestone: false,
         },
         {   // Proposal 2, Step 7
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
-            arbitrateApproveMilestone: false
-        }
+            arbitrateApproveMilestone: false,
+        },
     ],
     [ // Proposal 3
         {   // Proposal 3, Step 0
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
-            arbitrateApproveMilestone: false
+            arbitrateApproveMilestone: false,
         },
         {   // Proposal 3, Step 1 after propose
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: false,
-            arbitrateApproveMilestone: false
+            arbitrateApproveMilestone: false,
         },
         {   // Proposal 3, Step 2
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 3
-            markMilestoneComplete:true,
+            markMilestoneComplete: true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
+            arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 4
-            markMilestoneComplete:true,
+            markMilestoneComplete: true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
@@ -284,7 +277,7 @@ var proposals = [
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 5
-            markMilestoneComplete:true,
+            markMilestoneComplete: true,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
@@ -292,7 +285,7 @@ var proposals = [
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 6
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
@@ -300,51 +293,50 @@ var proposals = [
             arbitrateApproveMilestone: true,
         },
         {   // Proposal 3, Step 7
-            markMilestoneComplete:false,
+            markMilestoneComplete: false,
             approveCompletedMilestone: false,
             rejectMilestone: false,
             requestMilestonePayment: false,
             cancelMilestone: true,
-            arbitrateApproveMilestone: true
-        }
-    ]
+            arbitrateApproveMilestone: true,
+        },
+    ],
 ];
 
-var caller;
+let caller;
 
-describe('Normal Scenario Milestone test', function(){
-    var vault;
-    var milestoneTracker;
-    var owner;
-    var hatchCaller;
-    var hatchReceiver;
-    var guardian;
-    var spender;
-    var recipient;
-    var guest;
-    var arbitrator;
-    var donor;
-    var reviewer;
-    var milestoneLeadLink;
+describe("Normal Scenario Milestone test", () => {
+    let vault;
+    let milestoneTracker;
+    let owner;
+    let escapeCaller;
+    let escapeDestination;
+    let guardian;
+    let recipient;
+    let arbitrator;
+    let donor;
+    let reviewer;
+    let milestoneLeadLink;
 
-    var milestonesBytes;
-    var milestones;
+    let milestonesBytes;
+    let milestones;
 
-    before(function(done) {
+    before((done) => {
 //        ethConnector.init('rpc', function(err) {
-        ethConnector.init('testrpc' ,{gasLimit: 4000000}, function(err) {
-            if (err) return done(err);
-            owner = ethConnector.accounts[0];
-            hatchCaller = ethConnector.accounts[1];
-            hatchReceiver = ethConnector.accounts[2];
-            guardian = ethConnector.accounts[3];
-            spender = ethConnector.accounts[4];
-            recipient = ethConnector.accounts[5];
-            guest = ethConnector.accounts[6];
+        ethConnector.init("testrpc", { gasLimit: 4000000 }, (err) => {
+            if (err) {
+                done(err);
+                return;
+            }
+            owner = ethConnector.accounts[ 0 ];
+            escapeCaller = ethConnector.accounts[ 1 ];
+            escapeDestination = ethConnector.accounts[ 2 ];
+            guardian = ethConnector.accounts[ 3 ];
+            recipient = ethConnector.accounts[ 5 ];
             arbitrator = owner;
-            donor =ethConnector.accounts[7];
-            reviewer = ethConnector.accounts[8];
-            milestoneLeadLink = ethConnector.accounts[9];
+            donor = ethConnector.accounts[ 7 ];
+            reviewer = ethConnector.accounts[ 8 ];
+            milestoneLeadLink = ethConnector.accounts[ 9 ];
 
             caller = {
                 markMilestoneComplete: milestoneLeadLink,
@@ -352,290 +344,285 @@ describe('Normal Scenario Milestone test', function(){
                 rejectMilestone: reviewer,
                 requestMilestonePayment: milestoneLeadLink,
                 cancelMilestone: recipient,
-                arbitrateApproveMilestone: arbitrator
+                arbitrateApproveMilestone: arbitrator,
             };
             done();
         });
     });
-    it('should deploy vault contracts ', function(done){
+    it("should deploy vault contracts ", function(done) {
         this.timeout(20000);
-        var now = Math.floor(new Date().getTime() /1000);
 
-        vaultHelper.deploy({
-            escapeCaller: hatchCaller,
-            escapeDestination: hatchReceiver,
+        Vault.deploy(ethConnector.web3, {
+            escapeCaller,
+            escapeDestination,
             absoluteMinTimeLock: 86400,
-            timeLock: 86400*2,
-            guardian: guardian,
-            maxGuardianDelay: 86400*21
-        }, function(err, _vault) {
+            timeLock: 86400 * 2,
+            guardian,
+            maxGuardianDelay: 86400 * 21,
+        }, (err, _vault) => {
             assert.ifError(err);
-            assert.ok(_vault.address);
+            assert.ok(_vault.contract.address);
             vault = _vault;
             done();
         });
     });
-    it('should deploy milestoneTracker contracts ', function(done){
+    it("should deploy milestoneTracker contracts ", function(done) {
         this.timeout(20000);
-        var now = Math.floor(new Date().getTime() /1000);
-        milestoneTrackerHelper.deploy({
-            arbitrator: arbitrator,
-            donor: donor,
-            recipient: recipient
-        }, function(err, _milestoneTracker) {
+        MilestoneTracker.deploy(ethConnector.web3, {
+            arbitrator,
+            donor,
+            recipient,
+        }, (err, _milestoneTracker) => {
             assert.ifError(err);
-            assert.ok(_milestoneTracker.address);
+            assert.ok(_milestoneTracker.contract.address);
             milestoneTracker = _milestoneTracker;
             done();
         });
     });
-    it('Should authorize milestoneTracker as spender', function(done) {
-        this.timeout(20000);
-        vault.authorizeSpender(milestoneTracker.address, true, {
+    it("Should authorize milestoneTracker as spender", (done) => {
+        vault.contract.authorizeSpender(milestoneTracker.contract.address, true, {
             from: owner,
-            gas: 200000
-        }, function(err) {
+            gas: 200000,
+        }, (err) => {
             assert.ifError(err);
-            vault.allowedSpenders(milestoneTracker.address, function(err, res) {
-                assert.ifError(err);
+            vault.contract.allowedSpenders(milestoneTracker.contract.address, (err2, res) => {
+                assert.ifError(err2);
                 assert.equal(res, true);
                 done();
             });
         });
     });
-    it("Stp0: Should not allow any action before creating the proposals", function(done) {
-        this.timeout(20000);
-        checkStep(0,done);
+    it("Stp0: Should not allow any action before creating the proposals", (done) => {
+        checkStep(0, done);
     });
-    it('Stp1: Should propose the proposals', function(done) {
-        this.timeout(20000000);
-        var now = Math.floor(new Date().getTime() / 1000);
+    it("Stp1: Should propose the proposal", (done) => {
+        const now = Math.floor(new Date().getTime() / 1000);
 
         milestones = [];
-        for (var i=0; i<4; i++) {
+        for (let i = 0; i < 4; i += 1) {
             milestones.push({
                 description: "Proposal " + i,
                 url: "http://url_" + i,
-                minCompletionDate: now+86400,
-                maxCompletionDate: now+86400*3,
-                reviewer: reviewer,
-                milestoneLeadLink: milestoneLeadLink,
-                reviewTime: 86400*2,
-                paymentSource: vault.address,
-                payData: vault.authorizePayment.getData("Proposal " +i, recipient, ethConnector.web3.toWei(i), 0)
+                minCompletionDate: now + 86400,
+                maxCompletionDate: now + (86400 * 3),
+                reviewer,
+                milestoneLeadLink,
+                reviewTime: 86400 * 2,
+                paymentSource: vault.contract.address,
+                payData: vault.contract.authorizePayment.getData("Proposal " + i, recipient, ethConnector.web3.toWei(i), 0),
+                status: "AcceptedAndInProgress",
+                payDescription: "Proposal " + i,
+                payRecipient: recipient,
+                payValue: i,
+                payDelay: 0,
+                doneTime: 0,
             });
         }
 
-        milestonesBytes = milestoneTrackerHelper.milestones2bytes(milestones);
-        var calcMilestones = milestoneTrackerHelper.bytes2milestones(milestonesBytes);
-        assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones));
+        milestonesBytes = MilestoneTracker.milestones2bytes(milestones);
+        const calcMilestones1 = MilestoneTracker.bytes2milestones(milestonesBytes);
+        assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones1));
 
-        milestoneTracker.proposeMilestones(milestonesBytes, {
+        milestoneTracker.contract.proposeMilestones(milestonesBytes, {
             from: recipient,
-            gas: 1000000
-        },function(err, res) {
+            gas: 1000000,
+        }, (err) => {
             assert.ifError(err);
-            milestoneTracker.proposedMilestones(function(err, res) {
-                assert.ifError(err);
-                assert.equal(res,milestonesBytes);
-                var calcMilestones = milestoneTrackerHelper.bytes2milestones(res);
-                assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones));
-                checkStep(1,done);
+            milestoneTracker.contract.proposedMilestones((err2, res) => {
+                assert.ifError(err2);
+                assert.equal(res, milestonesBytes);
+                const calcMilestones = MilestoneTracker.bytes2milestones(res);
+                assert.deepEqual(normalizeMilestones(milestones),
+                    normalizeMilestones(calcMilestones));
+                checkStep(1, done);
             });
         });
     });
-    it('Stp2: Should approve the proposals', function(done) {
-        this.timeout(20000000);
-        milestoneTracker.acceptProposedMilestones(ethConnector.web3.sha3( milestonesBytes, {encoding: 'hex'}), {from: donor, gas: 2000000}, function(err) {
-            assert.ifError(err);
-            async.series([
-                function(cb) {
-                         milestoneTracker.numberOfMilestones(function(err, res) {
-                            assert.ifError(err);
-                            assert.equal(res,4);
-                            cb();
-                        });
-                },
-                function(cb) {
-                    var i =0;
-                    async.whilst(
-                    function() { return i<4; },
-                    function(cb) {
-                        milestoneTracker.milestones(i, function(err, res) {
-                            assert.ifError(err);
-                            assert.equal(res[0], milestones[i].description);
-                            assert.equal(res[1], milestones[i].url);
-                            assert.equal(res[2], milestones[i].minCompletionDate);
-                            assert.equal(res[3], milestones[i].maxCompletionDate);
-                            assert.equal(res[4], milestones[i].milestoneLeadLink);
-                            assert.equal(res[5], milestones[i].reviewer);
-                            assert.equal(res[6], milestones[i].reviewTime);
-                            assert.equal(res[7], milestones[i].paymentSource);
-                            assert.equal(res[8], milestones[i].payData);
-                            i++;
-                            cb();
-                        });
-                    },
-                    cb);
-                },
-                function(cb) {
-                    checkStep(2,done);
-                }
-            ], done);
-        });
-    });
-    it('Should delay until proposals are doable', function(done) {
-        bcDelay(86400 +1, done);
-    });
-    it('Stp3: Mark proposals as done', function(done) {
+    it("Stp2: Should approve the proposals", function (done) {
         this.timeout(20000);
-        checkStep(3,done);
+        milestoneTracker.contract.acceptProposedMilestones(
+            ethConnector.web3.sha3(milestonesBytes, { encoding: "hex" }),
+            { from: donor, gas: 2000000 },
+            (err) => {
+                assert.ifError(err);
+
+                milestoneTracker.getState((err2, st) => {
+                    assert.ifError(err2);
+                    assert.equal(st.milestones.length, 4);
+                    assert.deepEqual(st.milestones, milestones);
+                    checkStep(2, done);
+                });
+            });
     });
-    it('Step4: Approve or disapprove', function(done) {
+    it("Should delay until proposals are doable", (done) => {
+        bcDelay(86400 + 1, done);
+    });
+    it("Stp3: Mark proposals as done", function (done) {
         this.timeout(20000);
-        checkStep(4,done);
+        checkStep(3, done);
     });
-    it('Step5: Complete and force aprove', function(done) {
-        this.timeout(20000);
-        checkStep(5,done);
+    it("Step4: Approve or disapprove", (done) => {
+        checkStep(4, done);
     });
-    it('Should delay until proposal aproves automatically', function(done) {
-        bcDelay(86400*2 +1, done);
+    it("Step5: Complete and force aprove", (done) => {
+        checkStep(5, done);
     });
-    it('Step6: Collect', function(done) {
-        this.timeout(20000);
-        checkStep(6,done);
+    it("Should delay until proposal aproves automatically", (done) => {
+        bcDelay((86400 * 2) + 1, done);
     });
-    it('Should delay until proposals expires', function(done) {
-        bcDelay(86400 +1, done);
+    it("Step6: Collect", (done) => {
+        checkStep(6, done);
     });
-    it('Step7: Expiration', function(done) {
-        this.timeout(20000);
-        checkStep(7,done);
+    it("Should delay until proposals expires", (done) => {
+        bcDelay(86400 + 1, done);
+    });
+    it("Step7: Expiration", (done) => {
+        checkStep(7, done);
     });
 
     function checkStep(step, cb) {
-        async.eachSeries(_.range(proposals.length), function(proposal, cb) {
-            log("Start check step: " + step + " Proposal: "+proposal);
+        async.eachSeries(_.range(proposals.length), (proposal, cb1) => {
+            log("Start check step: " + step + " Proposal: " + proposal);
             async.series([
-                function(cb) {
-                    doAction(proposal, proposals[proposal][step].action, cb);
+                (cb2) => {
+                    doAction(proposal, proposals[ proposal ][ step ].action, cb2);
                 },
-                function(cb) {
-                    checkStepProposal(step, proposal, cb);
+                (cb2) => {
+                    checkStepProposal(step, proposal, cb2);
                 },
-                function(cb) {
-                    if (proposals[proposal][step].testPayment) {
-                        checkPayment(proposal, cb);
+                (cb2) => {
+                    if (proposals[ proposal ][ step ].testPayment) {
+                        checkPayment(proposal, cb2);
                     } else {
-                        cb();
+                        cb2();
                     }
-                }
-            ], cb);
-        }, cb);
+                },
+            ], cb1);
+        }, (err) => {
+            log("End step: " + step);
+            cb(err);
+        });
     }
 
     function doAction(proposal, action, cb) {
-        if (!action) return cb();
-        log("Proposa: "+ proposal + " Action: " + action + " Sender: " + caller[action]);
-        milestoneTracker[action](proposal,
+        if (!action) {
+            cb();
+            return;
+        }
+        log("Proposa: " + proposal + " Action: " + action + " Sender: " + caller[ action ]);
+        milestoneTracker.contract[ action ](proposal,
             {
-                from: caller[action],
-                gas: 2000000
-            },function(err, res) {
+                from: caller[ action ],
+                gas: 2000000,
+            }, (err) => {
                 assert.ifError(err);
-                milestoneTracker.milestones(proposal, function(err, res) {
-                    assert.ifError(err);
+                milestoneTracker.contract.milestones(proposal, (err2, res) => {
+                    assert.ifError(err2);
                     log("Proposal: " + JSON.stringify(res));
                     cb();
                 });
-            }
-        );
+            });
     }
 
-    function checkPayment(proposal,cb) {
-        var numberOfAuthorizedPayments;
-        var payment;
-        var i=0;
+    function checkPayment(proposal, cb) {
+        let numberOfAuthorizedPayments;
+        let payment;
+        let i = 0;
         async.series([
-            function(cb) {
-                vault.numberOfAuthorizedPayments(function(err, res) {
+            (cb1) => {
+                vault.contract.numberOfAuthorizedPayments((err, res) => {
                     assert.ifError(err);
                     numberOfAuthorizedPayments = res;
-                    cb();
+                    cb1();
                 });
             },
-            function(cb) {
-
+            (cb1) => {
                 async.whilst(
-                    function() { return (i< numberOfAuthorizedPayments)&&(!payment); },
-                    function(cb) {
-                        vault.authorizedPayments(i, function(err, res) {
+                    () => ((i < numberOfAuthorizedPayments) && (!payment)),
+                    (cb2) => {
+                        vault.contract.authorizedPayments(i, (err, res) => {
                             assert.ifError(err);
-                            if (res[0] === "Proposal "+i) {
+                            if (res[ 0 ] === "Proposal " + i) {
                                 payment = res;
                             } else {
-                                i++;
+                                i += 1;
                             }
-                            cb();
+                            cb2();
                         });
                     },
-                    cb
-                );
+                    cb1);
             },
-            function(cb) {
-                var now = Math.floor(new Date().getTime() / 1000);
-                assert.equal(payment[1], milestoneTracker.address);
-                assert(payment[2].toNumber()>=now+86400*3 - 15);
-                assert(payment[2].toNumber()-now<86400*3 + 15);
-                assert.equal(payment[3], false);  // canceled
-                assert.equal(payment[4], false);  // payed
-                assert.equal(payment[5], recipient);
-                assert.equal(payment[6], ethConnector.web3.toWei(i));
-                cb();
-            }
+            (cb1) => {
+                const now = Math.floor(new Date().getTime() / 1000);
+                assert.equal(payment[ 1 ], milestoneTracker.contract.address);
+                assert(payment[ 2 ].toNumber() >= (now + (86400 * 3)) - 15);
+                assert(payment[ 2 ].toNumber() <= (now + (86400 * 3)) + 15);
+                assert.equal(payment[ 3 ], false);  // canceled
+                assert.equal(payment[ 4 ], false);  // payed
+                assert.equal(payment[ 5 ], recipient);
+                assert.equal(payment[ 6 ], ethConnector.web3.toWei(i));
+                cb1();
+            },
         ], cb);
     }
 
     function checkStepProposal(step, proposal, cb) {
-
         async.eachSeries(
             [
-                'markMilestoneComplete',
-                'approveCompletedMilestone',
-                'rejectMilestone',
-                'requestMilestonePayment',
-                'cancelMilestone',
-                'arbitrateApproveMilestone'
+                "markMilestoneComplete",
+                "approveCompletedMilestone",
+                "rejectMilestone",
+                "requestMilestonePayment",
+                "cancelMilestone",
+                "arbitrateApproveMilestone",
             ],
-            function(method,cb) {
-                log("Check Step: " + step + " Proposal: "+proposal+ " Method: " + method);
-                milestoneTracker[method].estimateGas(proposal, {
-                    from: caller[method],
-                    gas: 4000000
-                }, function(err, res) {
-                    if (proposals[proposal][step][method]) {
+            (method, cb1) => {
+                log("Check Step: " + step + " Proposal: " + proposal + " Method: " + method);
+                milestoneTracker.contract[ method ].estimateGas(proposal, {
+                    from: caller[ method ],
+                    gas: 4000000,
+                }, (err) => {
+                    if (proposals[ proposal ][ step ][ method ]) {
                         assert.ifError(err);
                     } else {
                         assert(err);
                     }
-                    cb();
+                    cb1();
                 });
             },
-            cb
-        );
+            cb);
     }
 
     function bcDelay(secs, cb) {
-        send("evm_increaseTime", [secs], function(err, result) {
-            if (err) return cb(err);
+        send("evm_increaseTime", [ secs ], (err) => {
+            if (err) { cb(err); return; }
 
       // Mine a block so new time is recorded.
-            send("evm_mine", function(err, result) {
-                if (err) return cb(err);
+            send("evm_mine", (err1) => {
+                if (err1) { cb(err); return; }
                 cb();
             });
         });
+    }
+
+        // CALL a low level rpc
+    function send(method, _params, _callback) {
+        let params;
+        let callback;
+        if (typeof _params === "function") {
+            callback = _params;
+            params = [];
+        } else {
+            params = _params;
+            callback = _callback;
+        }
+
+        ethConnector.web3.currentProvider.sendAsync({
+            jsonrpc: "2.0",
+            method,
+            params: params || [],
+            id: new Date().getTime(),
+        }, callback);
     }
 
     function log(S) {
@@ -644,24 +631,9 @@ describe('Normal Scenario Milestone test', function(){
         }
     }
 
-        // CALL a low level rpc
-    function send(method, params, callback) {
-        if (typeof params == "function") {
-          callback = params;
-          params = [];
-        }
-
-        ethConnector.web3.currentProvider.sendAsync({
-          jsonrpc: "2.0",
-          method: method,
-          params: params || [],
-          id: new Date().getTime()
-        }, callback);
-    }
-
-    function normalizeMilestones(milestones) {
-        _.map(milestones, function(milestone) {
-            return {
+    function normalizeMilestones(mls) {
+        _.map(mls, (milestone) => {
+            const r = {
                 description: milestone.description,
                 url: milestone.url,
                 minCompletionDate: new BigNumber(milestone.minCompletionDate).toString(),
@@ -670,8 +642,9 @@ describe('Normal Scenario Milestone test', function(){
                 reviewer: milestone.reviewer,
                 reviewTime: new BigNumber(milestone.reviewTime).toString(),
                 paymentSource: milestone.paymentSource,
-                payData: milestone.payData
+                payData: milestone.payData,
             };
+            return r;
         });
     }
 });

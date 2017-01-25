@@ -347,7 +347,7 @@ contract MilestoneTracker {
     }
 
     /// @notice `onlyArbitrator` Cancels the entire campaign voiding all
-    ///  milestones vo
+    ///  milestones.
     function arbitrateCancelCampaign() onlyArbitrator campaignNotCanceled {
         campaignCanceled = true;
         CampaignCanceled();
