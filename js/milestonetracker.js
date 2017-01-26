@@ -194,6 +194,59 @@ export default class MilestoneTracker {
         const b = rlp.encode(d);
         return "0x" + b.toString("hex");
     }
+
+    proposeMilestones(milestones, fromAccount, _cb) {
+        const self = this;
+        let cb;
+        if (!cb) {
+            cb = fromAccount;
+        } else {
+            cb = _cb;
+        }
+        let account;
+        let gas;
+        const milestonesBytes = self.milestones2bytes(milestones);
+
+        async.series([
+            (cb1) => {
+                if (fromAccount) {
+                    account = fromAccount;
+                    cb1();
+                } else {
+                    self.web3.eth.getAccounts((err, _accounts) => {
+                        if (err) { cb1(err); return; }
+                        if (_accounts.length === 0) {
+                            cb1(new Error("No account to deploy a contract"));
+                            return;
+                        }
+                        account = _accounts[ 0 ];
+                        cb1();
+                    });
+                }
+            },
+            (cb1) => {
+                this.contract.proposeMilestones.estimateGas(milestonesBytes, {
+                    from: account,
+                    gas: 4000000,
+                }, (err, _gas) => {
+                    if (err) {
+                        cb1(err);
+                    } else if (_gas >= 4000000) {
+                        cb1(new Error("throw"));
+                    } else {
+                        gas = _gas;
+                        cb1();
+                    }
+                });
+            },
+            (cb1) => {
+                this.contract.proposeMilestones(milestonesBytes, {
+                    from: account,
+                    gas: gas + 5000,
+                }, cb1);
+            },
+        ], cb);
+    }
 }
 
 function decodePayData(payData) {

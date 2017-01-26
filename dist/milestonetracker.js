@@ -136,6 +136,60 @@ var MilestoneTracker = function () {
                 cb(null, st);
             });
         }
+    }, {
+        key: "proposeMilestones",
+        value: function proposeMilestones(milestones, fromAccount, _cb) {
+            var _this2 = this;
+
+            var self = this;
+            var cb = void 0;
+            if (!cb) {
+                cb = fromAccount;
+            } else {
+                cb = _cb;
+            }
+            var account = void 0;
+            var gas = void 0;
+            var milestonesBytes = self.milestones2bytes(milestones);
+
+            _async2.default.series([function (cb1) {
+                if (fromAccount) {
+                    account = fromAccount;
+                    cb1();
+                } else {
+                    self.web3.eth.getAccounts(function (err, _accounts) {
+                        if (err) {
+                            cb1(err);return;
+                        }
+                        if (_accounts.length === 0) {
+                            cb1(new Error("No account to deploy a contract"));
+                            return;
+                        }
+                        account = _accounts[0];
+                        cb1();
+                    });
+                }
+            }, function (cb1) {
+                _this2.contract.proposeMilestones.estimateGas(milestonesBytes, {
+                    from: account,
+                    gas: 4000000
+                }, function (err, _gas) {
+                    if (err) {
+                        cb1(err);
+                    } else if (_gas >= 4000000) {
+                        cb1(new Error("throw"));
+                    } else {
+                        gas = _gas;
+                        cb1();
+                    }
+                });
+            }, function (cb1) {
+                _this2.contract.proposeMilestones(milestonesBytes, {
+                    from: account,
+                    gas: gas + 5000
+                }, cb1);
+            }], cb);
+        }
     }], [{
         key: "deploy",
         value: function deploy(web3, opts, cb) {
@@ -264,3 +318,4 @@ function pad(_n, width, _z) {
     var n = _n.toString();
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
+module.exports = exports["default"];

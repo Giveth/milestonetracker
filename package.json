@@ -1,6 +1,6 @@
 {
   "name": "milestonetracker",
-  "version": "0.1.9",
+  "version": "0.1.11",
   "description": "Milestone Tracker contract",
   "main": "dist/milestonetracker.js",
   "directories": {
@@ -40,15 +40,16 @@
     "vaultcontract": "0.2.6"
   },
   "devDependencies": {
-    "ethconnector": "0.0.22",
     "babel-core": "^6.22.1",
     "babel-eslint": "^7.1.1",
+    "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-es2015": "^6.22.0",
     "eslint": "^3.14.0",
     "eslint-config-airbnb": "^14.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx": "0.0.2",
     "eslint-plugin-jsx-a11y": "^3.0.2",
-    "eslint-plugin-react": "^6.9.0"
+    "eslint-plugin-react": "^6.9.0",
+    "ethconnector": "0.0.22"
   }
 }
