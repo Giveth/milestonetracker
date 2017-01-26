@@ -2,6 +2,7 @@ import async from "async";
 import _ from "lodash";
 import rlp from "rlp";
 import BigNumber from "bignumber.js";
+import Vault from "vaultcontract";
 import { MilestoneTrackerAbi, MilestoneTrackerByteCode } from "../contracts/MilestoneTracker.sol.js";
 
 export default class MilestoneTracker {
@@ -173,23 +174,39 @@ export default class MilestoneTracker {
         return milestones;
     }
 
-    static milestones2bytes(milestones) {
+    milestones2bytes(milestones) {
+        const self = this;
         function n2buff(a) {
             let S = new BigNumber(a).toString(16);
             if (S.length % 2 === 1) S = "0" + S;
             return new Buffer(S, "hex");
         }
-        const d = _.map(milestones, milestone => [
-            new Buffer(milestone.description),
-            new Buffer(milestone.url),
-            n2buff(milestone.minCompletionDate),
-            n2buff(milestone.maxCompletionDate),
-            milestone.milestoneLeadLink,
-            milestone.reviewer,
-            n2buff(milestone.reviewTime),
-            milestone.paymentSource,
-            milestone.payData,
-        ]);
+        const d = _.map(milestones, (milestone) => {
+            let data;
+            if (milestone.payData) {
+                data = milestone.payData;
+            } else {
+                const vault = new Vault(self.web3, milestone.paymentSource);
+                data = vault.contract.authorizedPayments.getData(
+                            milestone.payRecipient,
+                            milestone.payDescription,
+                            milestone.payValue,
+                            milestone.payDelay || 0,
+                            { from: self.contract.address });
+            }
+
+            return [
+                new Buffer(milestone.description),
+                new Buffer(milestone.url),
+                n2buff(milestone.minCompletionDate),
+                n2buff(milestone.maxCompletionDate),
+                milestone.milestoneLeadLink,
+                milestone.reviewer,
+                n2buff(milestone.reviewTime),
+                milestone.paymentSource,
+                data,
+            ];
+        });
 
         const b = rlp.encode(d);
         return "0x" + b.toString("hex");
@@ -198,13 +215,14 @@ export default class MilestoneTracker {
     proposeMilestones(milestones, fromAccount, _cb) {
         const self = this;
         let cb;
-        if (!cb) {
+        if (!_cb) {
             cb = fromAccount;
         } else {
             cb = _cb;
         }
         let account;
         let gas;
+
         const milestonesBytes = self.milestones2bytes(milestones);
 
         async.series([
@@ -225,7 +243,7 @@ export default class MilestoneTracker {
                 }
             },
             (cb1) => {
-                this.contract.proposeMilestones.estimateGas(milestonesBytes, {
+                self.contract.proposeMilestones.estimateGas(milestonesBytes, {
                     from: account,
                     gas: 4000000,
                 }, (err, _gas) => {
@@ -240,7 +258,7 @@ export default class MilestoneTracker {
                 });
             },
             (cb1) => {
-                this.contract.proposeMilestones(milestonesBytes, {
+                self.contract.proposeMilestones(milestonesBytes, {
                     from: account,
                     gas: gas + 5000,
                 }, cb1);

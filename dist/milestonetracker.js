@@ -143,7 +143,7 @@ var MilestoneTracker = function () {
 
             var self = this;
             var cb = void 0;
-            if (!cb) {
+            if (!_cb) {
                 cb = fromAccount;
             } else {
                 cb = _cb;
@@ -151,6 +151,8 @@ var MilestoneTracker = function () {
             var account = void 0;
             var gas = void 0;
             var milestonesBytes = self.milestones2bytes(milestones);
+
+            console.log(milestonesBytes);
 
             _async2.default.series([function (cb1) {
                 if (fromAccount) {
@@ -180,6 +182,7 @@ var MilestoneTracker = function () {
                         cb1(new Error("throw"));
                     } else {
                         gas = _gas;
+                        console.log("Gas: ", gas);
                         cb1();
                     }
                 });

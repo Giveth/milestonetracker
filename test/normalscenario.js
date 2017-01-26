@@ -349,9 +349,7 @@ describe("Normal Scenario Milestone test", () => {
             done();
         });
     });
-    it("should deploy vault contracts ", function(done) {
-        this.timeout(20000);
-
+    it("should deploy vault contracts ", (done) => {
         Vault.deploy(ethConnector.web3, {
             escapeCaller,
             escapeDestination,
@@ -365,9 +363,8 @@ describe("Normal Scenario Milestone test", () => {
             vault = _vault;
             done();
         });
-    });
-    it("should deploy milestoneTracker contracts ", function(done) {
-        this.timeout(20000);
+    }).timeout(20000);
+    it("should deploy milestoneTracker contracts ", (done) => {
         MilestoneTracker.deploy(ethConnector.web3, {
             arbitrator,
             donor,
@@ -378,7 +375,7 @@ describe("Normal Scenario Milestone test", () => {
             milestoneTracker = _milestoneTracker;
             done();
         });
-    });
+    }).timeout(200000);
     it("Should authorize milestoneTracker as spender", (done) => {
         vault.contract.authorizeSpender(milestoneTracker.contract.address, true, {
             from: owner,
@@ -419,14 +416,11 @@ describe("Normal Scenario Milestone test", () => {
             });
         }
 
-        milestonesBytes = MilestoneTracker.milestones2bytes(milestones);
+        milestonesBytes = milestoneTracker.milestones2bytes(milestones);
         const calcMilestones1 = MilestoneTracker.bytes2milestones(milestonesBytes);
         assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones1));
 
-        milestoneTracker.contract.proposeMilestones(milestonesBytes, {
-            from: recipient,
-            gas: 1000000,
-        }, (err) => {
+        milestoneTracker.proposeMilestones(milestones, recipient, (err) => {
             assert.ifError(err);
             milestoneTracker.contract.proposedMilestones((err2, res) => {
                 assert.ifError(err2);
@@ -438,8 +432,7 @@ describe("Normal Scenario Milestone test", () => {
             });
         });
     });
-    it("Stp2: Should approve the proposals", function (done) {
-        this.timeout(20000);
+    it("Stp2: Should approve the proposals", (done) => {
         milestoneTracker.contract.acceptProposedMilestones(
             ethConnector.web3.sha3(milestonesBytes, { encoding: "hex" }),
             { from: donor, gas: 2000000 },
@@ -453,7 +446,7 @@ describe("Normal Scenario Milestone test", () => {
                     checkStep(2, done);
                 });
             });
-    });
+    }).timeout(20000);
     it("Should delay until proposals are doable", (done) => {
         bcDelay(86400 + 1, done);
     });
@@ -463,7 +456,7 @@ describe("Normal Scenario Milestone test", () => {
     });
     it("Step4: Approve or disapprove", (done) => {
         checkStep(4, done);
-    });
+    }).timeout(10000);
     it("Step5: Complete and force aprove", (done) => {
         checkStep(5, done);
     });
