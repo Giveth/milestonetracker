@@ -22,6 +22,10 @@ var _bignumber = require("bignumber.js");
 
 var _bignumber2 = _interopRequireDefault(_bignumber);
 
+var _vaultcontract = require("vaultcontract");
+
+var _vaultcontract2 = _interopRequireDefault(_vaultcontract);
+
 var _MilestoneTrackerSol = require("../contracts/MilestoneTracker.sol.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -137,10 +141,32 @@ var MilestoneTracker = function () {
             });
         }
     }, {
+        key: "milestones2bytes",
+        value: function milestones2bytes(milestones) {
+            var self = this;
+            function n2buff(a) {
+                var S = new _bignumber2.default(a).toString(16);
+                if (S.length % 2 === 1) S = "0" + S;
+                return new Buffer(S, "hex");
+            }
+            var d = _lodash2.default.map(milestones, function (milestone) {
+                var data = void 0;
+                if (milestone.payData) {
+                    data = milestone.payData;
+                } else {
+                    var vault = new _vaultcontract2.default(self.web3, milestone.paymentSource);
+                    data = vault.contract.authorizedPayments.getData(milestone.payRecipient, milestone.payDescription, milestone.payValue, milestone.payDelay || 0, { from: self.contract.address });
+                }
+
+                return [new Buffer(milestone.description), new Buffer(milestone.url), n2buff(milestone.minCompletionDate), n2buff(milestone.maxCompletionDate), milestone.milestoneLeadLink, milestone.reviewer, n2buff(milestone.reviewTime), milestone.paymentSource, data];
+            });
+
+            var b = _rlp2.default.encode(d);
+            return "0x" + b.toString("hex");
+        }
+    }, {
         key: "proposeMilestones",
         value: function proposeMilestones(milestones, fromAccount, _cb) {
-            var _this2 = this;
-
             var self = this;
             var cb = void 0;
             if (!_cb) {
@@ -150,9 +176,8 @@ var MilestoneTracker = function () {
             }
             var account = void 0;
             var gas = void 0;
-            var milestonesBytes = self.milestones2bytes(milestones);
 
-            console.log(milestonesBytes);
+            var milestonesBytes = self.milestones2bytes(milestones);
 
             _async2.default.series([function (cb1) {
                 if (fromAccount) {
@@ -172,7 +197,7 @@ var MilestoneTracker = function () {
                     });
                 }
             }, function (cb1) {
-                _this2.contract.proposeMilestones.estimateGas(milestonesBytes, {
+                self.contract.proposeMilestones.estimateGas(milestonesBytes, {
                     from: account,
                     gas: 4000000
                 }, function (err, _gas) {
@@ -182,12 +207,11 @@ var MilestoneTracker = function () {
                         cb1(new Error("throw"));
                     } else {
                         gas = _gas;
-                        console.log("Gas: ", gas);
                         cb1();
                     }
                 });
             }, function (cb1) {
-                _this2.contract.proposeMilestones(milestonesBytes, {
+                self.contract.proposeMilestones(milestonesBytes, {
                     from: account,
                     gas: gas + 5000
                 }, cb1);
@@ -259,21 +283,6 @@ var MilestoneTracker = function () {
                 return m;
             });
             return milestones;
-        }
-    }, {
-        key: "milestones2bytes",
-        value: function milestones2bytes(milestones) {
-            function n2buff(a) {
-                var S = new _bignumber2.default(a).toString(16);
-                if (S.length % 2 === 1) S = "0" + S;
-                return new Buffer(S, "hex");
-            }
-            var d = _lodash2.default.map(milestones, function (milestone) {
-                return [new Buffer(milestone.description), new Buffer(milestone.url), n2buff(milestone.minCompletionDate), n2buff(milestone.maxCompletionDate), milestone.milestoneLeadLink, milestone.reviewer, n2buff(milestone.reviewTime), milestone.paymentSource, milestone.payData];
-            });
-
-            var b = _rlp2.default.encode(d);
-            return "0x" + b.toString("hex");
         }
     }]);
 
