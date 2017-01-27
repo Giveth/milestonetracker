@@ -10,24 +10,7 @@ var BigNumber = require('bignumber.js');
 var eth = web3.eth;
 var async = require('async');
 
-var liquiumRT = require('./js/liquium_rt.js');
+var MilestoneTracker = require('./dist/milestoneTracker.js');
 
 
-var organization;
-var singleChoice;
-var idCategory;
-var idDelegate;
-var idPoll;
-
-function deployOrganization(cb) {
-    cb = cb || function() {};
-    liquiumRT.deployOrganization(web3, eth.accounts[0], {}, function(err, _organization) {
-        if (err) {
-            console.log(err);
-            return cb(err);
-        }
-        organization = _organization;
-        console.log("Organization deployed at: "+organization.address);
-        cb();
-    });
-}
+var milestoneTracker = new MilestoneTracker(web3, '0x0F593DCCe096c5C39Bd509123150707644Ad48DE');
