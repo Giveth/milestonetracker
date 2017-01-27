@@ -1,6 +1,6 @@
 {
   "name": "milestonetracker",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Milestone Tracker contract",
   "main": "dist/milestonetracker.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
-    "build": "rm -rf dist/* && babel-node js/compile.js && babel js/milestonetracker.js -o dist/milestonetracker.js"
+    "build": "rm -rf dist/* && babel-node js/compile.js && babel js/milestonetracker.js js/runethtx.js -o dist/milestonetracker.js"
   },
   "repository": {
     "type": "git",
