@@ -227,6 +227,15 @@ export default class MilestoneTracker {
         return runEthTx(newOpts, cb);
     }
 
+    unproposeMilestones(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "unproposeMilestones",
+            }),
+            cb);
+    }
+
     acceptMilestones(opts, cb) {
         return runEthTx(
             Object.assign({}, opts, {
