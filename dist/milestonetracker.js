@@ -194,11 +194,11 @@ var MilestoneTracker = function () {
             }), cb);
         }
     }, {
-        key: "acceptMilestones",
-        value: function acceptMilestones(opts, cb) {
+        key: "acceptProposedMilestones",
+        value: function acceptProposedMilestones(opts, cb) {
             return runEthTx(Object.assign({}, opts, {
                 contract: this.contract,
-                method: "acceptMilestones"
+                method: "acceptProposedMilestones"
             }), cb);
         }
     }], [{

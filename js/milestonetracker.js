@@ -237,11 +237,11 @@ export default class MilestoneTracker {
             cb);
     }
 
-    acceptMilestones(opts, cb) {
+    acceptProposedMilestones(opts, cb) {
         return runEthTx(
             Object.assign({}, opts, {
                 contract: this.contract,
-                method: "acceptMilestones",
+                method: "acceptProposedMilestones",
             }),
             cb);
     }
