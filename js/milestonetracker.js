@@ -232,6 +232,7 @@ export default class MilestoneTracker {
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "unproposeMilestones",
+                extraGas: 500000,
             }),
             cb);
     }

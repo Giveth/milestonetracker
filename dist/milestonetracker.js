@@ -189,7 +189,8 @@ var MilestoneTracker = function () {
         value: function unproposeMilestones(opts, cb) {
             return runEthTx(Object.assign({}, opts, {
                 contract: this.contract,
-                method: "unproposeMilestones"
+                method: "unproposeMilestones",
+                extraGas: 500000
             }), cb);
         }
     }, {
