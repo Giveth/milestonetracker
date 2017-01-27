@@ -185,6 +185,14 @@ var MilestoneTracker = function () {
             return runEthTx(newOpts, cb);
         }
     }, {
+        key: "unproposeMilestones",
+        value: function unproposeMilestones(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "unproposeMilestones"
+            }), cb);
+        }
+    }, {
         key: "acceptMilestones",
         value: function acceptMilestones(opts, cb) {
             return runEthTx(Object.assign({}, opts, {
