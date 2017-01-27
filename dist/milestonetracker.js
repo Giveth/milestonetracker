@@ -202,6 +202,96 @@ var MilestoneTracker = function () {
                 extraGas: 500000
             }), cb);
         }
+    }, {
+        key: "changeArbitrator",
+        value: function changeArbitrator(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "changeArbitrator",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "changeDonor",
+        value: function changeDonor(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "changeDonor",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "changeRecipient",
+        value: function changeRecipient(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "changeRecipient",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "markMilestoneComplete",
+        value: function markMilestoneComplete(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "markMilestoneComplete",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "approveCompletedMilestone",
+        value: function approveCompletedMilestone(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "approveCompletedMilestone",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "rejectMilestone",
+        value: function rejectMilestone(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "approveCompletedMilestone",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "requestMilestonePayment",
+        value: function requestMilestonePayment(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "requestMilestonePayment",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "cancelMilestone",
+        value: function cancelMilestone(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "cancelMilestone",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "arbitrateApproveMilestone",
+        value: function arbitrateApproveMilestone(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "arbitrateApproveMilestone",
+                extraGas: 5000
+            }), cb);
+        }
+    }, {
+        key: "arbitrateCancelCampaign",
+        value: function arbitrateCancelCampaign(opts, cb) {
+            return runEthTx(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "arbitrateCancelCampaign",
+                extraGas: 5000
+            }), cb);
+        }
     }], [{
         key: "deploy",
         value: function deploy(web3, opts, cb) {

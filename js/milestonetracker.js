@@ -246,6 +246,106 @@ export default class MilestoneTracker {
             }),
             cb);
     }
+
+    changeArbitrator(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "changeArbitrator",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    changeDonor(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "changeDonor",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    changeRecipient(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "changeRecipient",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    markMilestoneComplete(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "markMilestoneComplete",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    approveCompletedMilestone(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "approveCompletedMilestone",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    rejectMilestone(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "approveCompletedMilestone",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    requestMilestonePayment(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "requestMilestonePayment",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    cancelMilestone(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "cancelMilestone",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    arbitrateApproveMilestone(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "arbitrateApproveMilestone",
+                extraGas: 5000,
+            }),
+            cb);
+    }
+
+    arbitrateCancelCampaign(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "arbitrateCancelCampaign",
+                extraGas: 5000,
+            }),
+            cb);
+    }
 }
 
 function decodePayData(payData) {
@@ -394,4 +494,3 @@ function runEthTx({ contract, method, ...opts }, cb) {
         return promise;
     }
 }
-
