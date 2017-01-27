@@ -30,11 +30,9 @@ var _vaultcontract2 = _interopRequireDefault(_vaultcontract);
 
 var _MilestoneTrackerSol = require("../contracts/MilestoneTracker.sol.js");
 
-var _runethtx = require("./runethtx");
-
-var _runethtx2 = _interopRequireDefault(_runethtx);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -184,12 +182,12 @@ var MilestoneTracker = function () {
             if (_typeof(newOpts.newMilestones) === "object") {
                 newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
             }
-            return (0, _runethtx2.default)(newOpts, cb);
+            return runEthTx(newOpts, cb);
         }
     }, {
         key: "acceptMilestones",
         value: function acceptMilestones(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return runEthTx(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "acceptMilestones"
             }), cb);
@@ -307,21 +305,6 @@ function pad(_n, width, _z) {
     var n = _n.toString();
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
-module.exports = exports["default"];
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = runEthTx;
-
-var _async = require("async");
-
-var _async2 = _interopRequireDefault(_async);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 function runEthTx(_ref, cb) {
     var contract = _ref.contract,
