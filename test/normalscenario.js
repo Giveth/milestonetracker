@@ -420,7 +420,7 @@ describe("Normal Scenario Milestone test", () => {
         const calcMilestones1 = MilestoneTracker.bytes2milestones(milestonesBytes);
         assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones1));
 
-        milestoneTracker.proposeMilestones(milestones, recipient, (err) => {
+        milestoneTracker.proposeMilestones({ newMilestones: milestones, from: recipient }, (err) => {
             assert.ifError(err);
             milestoneTracker.contract.proposedMilestones((err2, res) => {
                 assert.ifError(err2);
@@ -450,10 +450,9 @@ describe("Normal Scenario Milestone test", () => {
     it("Should delay until proposals are doable", (done) => {
         bcDelay(86400 + 1, done);
     });
-    it("Stp3: Mark proposals as done", function (done) {
-        this.timeout(20000);
+    it("Stp3: Mark proposals as done", (done) => {
         checkStep(3, done);
-    });
+    }).timeout(20000);
     it("Step4: Approve or disapprove", (done) => {
         checkStep(4, done);
     }).timeout(10000);

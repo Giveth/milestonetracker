@@ -4,6 +4,7 @@ import rlp from "rlp";
 import BigNumber from "bignumber.js";
 import Vault from "vaultcontract";
 import { MilestoneTrackerAbi, MilestoneTrackerByteCode } from "../contracts/MilestoneTracker.sol.js";
+import runEthTx from "./runethtx";
 
 export default class MilestoneTracker {
 
@@ -95,6 +96,8 @@ export default class MilestoneTracker {
                 }
                 this.contract.proposedMilestones((err, res) => {
                     if (err) { cb1(err); return; }
+                    st.proposedMilestonesData = res;
+                    st.proposedMilestonesHash = this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
                     st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
                     cb1();
                 });
@@ -212,58 +215,26 @@ export default class MilestoneTracker {
         return "0x" + b.toString("hex");
     }
 
-    proposeMilestones(milestones, fromAccount, _cb) {
+    proposeMilestones(opts, cb) {
         const self = this;
-        let cb;
-        if (!_cb) {
-            cb = fromAccount;
-        } else {
-            cb = _cb;
+        const newOpts = Object.assign({}, opts);
+
+        newOpts.contract = this.contract;
+        newOpts.method = "proposeMilestones";
+
+        if (typeof newOpts.newMilestones === "object") {
+            newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
         }
-        let account;
-        let gas;
+        return runEthTx(newOpts, cb);
+    }
 
-        const milestonesBytes = self.milestones2bytes(milestones);
-
-        async.series([
-            (cb1) => {
-                if (fromAccount) {
-                    account = fromAccount;
-                    cb1();
-                } else {
-                    self.web3.eth.getAccounts((err, _accounts) => {
-                        if (err) { cb1(err); return; }
-                        if (_accounts.length === 0) {
-                            cb1(new Error("No account to deploy a contract"));
-                            return;
-                        }
-                        account = _accounts[ 0 ];
-                        cb1();
-                    });
-                }
-            },
-            (cb1) => {
-                self.contract.proposeMilestones.estimateGas(milestonesBytes, {
-                    from: account,
-                    gas: 4000000,
-                }, (err, _gas) => {
-                    if (err) {
-                        cb1(err);
-                    } else if (_gas >= 4000000) {
-                        cb1(new Error("throw"));
-                    } else {
-                        gas = _gas;
-                        cb1();
-                    }
-                });
-            },
-            (cb1) => {
-                self.contract.proposeMilestones(milestonesBytes, {
-                    from: account,
-                    gas: gas + 5000,
-                }, cb1);
-            },
-        ], cb);
+    acceptMilestones(opts, cb) {
+        return runEthTx(
+            Object.assign({}, opts, {
+                contract: this.contract,
+                method: "acceptMilestones",
+            }),
+            cb);
     }
 }
 

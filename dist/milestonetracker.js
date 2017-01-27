@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _async = require("async");
@@ -27,6 +29,10 @@ var _vaultcontract = require("vaultcontract");
 var _vaultcontract2 = _interopRequireDefault(_vaultcontract);
 
 var _MilestoneTrackerSol = require("../contracts/MilestoneTracker.sol.js");
+
+var _runethtx = require("./runethtx");
+
+var _runethtx2 = _interopRequireDefault(_runethtx);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -130,6 +136,8 @@ var MilestoneTracker = function () {
                     if (err) {
                         cb1(err);return;
                     }
+                    st.proposedMilestonesData = res;
+                    st.proposedMilestonesHash = _this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
                     st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
                     cb1();
                 });
@@ -166,56 +174,25 @@ var MilestoneTracker = function () {
         }
     }, {
         key: "proposeMilestones",
-        value: function proposeMilestones(milestones, fromAccount, _cb) {
+        value: function proposeMilestones(opts, cb) {
             var self = this;
-            var cb = void 0;
-            if (!_cb) {
-                cb = fromAccount;
-            } else {
-                cb = _cb;
+            var newOpts = Object.assign({}, opts);
+
+            newOpts.contract = this.contract;
+            newOpts.method = "proposeMilestones";
+
+            if (_typeof(newOpts.newMilestones) === "object") {
+                newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
             }
-            var account = void 0;
-            var gas = void 0;
-
-            var milestonesBytes = self.milestones2bytes(milestones);
-
-            _async2.default.series([function (cb1) {
-                if (fromAccount) {
-                    account = fromAccount;
-                    cb1();
-                } else {
-                    self.web3.eth.getAccounts(function (err, _accounts) {
-                        if (err) {
-                            cb1(err);return;
-                        }
-                        if (_accounts.length === 0) {
-                            cb1(new Error("No account to deploy a contract"));
-                            return;
-                        }
-                        account = _accounts[0];
-                        cb1();
-                    });
-                }
-            }, function (cb1) {
-                self.contract.proposeMilestones.estimateGas(milestonesBytes, {
-                    from: account,
-                    gas: 4000000
-                }, function (err, _gas) {
-                    if (err) {
-                        cb1(err);
-                    } else if (_gas >= 4000000) {
-                        cb1(new Error("throw"));
-                    } else {
-                        gas = _gas;
-                        cb1();
-                    }
-                });
-            }, function (cb1) {
-                self.contract.proposeMilestones(milestonesBytes, {
-                    from: account,
-                    gas: gas + 5000
-                }, cb1);
-            }], cb);
+            return (0, _runethtx2.default)(newOpts, cb);
+        }
+    }, {
+        key: "acceptMilestones",
+        value: function acceptMilestones(opts, cb) {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
+                contract: this.contract,
+                method: "acceptMilestones"
+            }), cb);
         }
     }], [{
         key: "deploy",
