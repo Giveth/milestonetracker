@@ -135,7 +135,7 @@ var MilestoneTracker = function () {
                         cb1(err);return;
                     }
                     st.proposedMilestonesData = res;
-                    st.proposedMilestonesHash = _this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
+                    st.proposedMilestonesHash = "0x" + _this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
                     st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
                     cb1();
                 });
@@ -198,7 +198,8 @@ var MilestoneTracker = function () {
         value: function acceptProposedMilestones(opts, cb) {
             return runEthTx(Object.assign({}, opts, {
                 contract: this.contract,
-                method: "acceptProposedMilestones"
+                method: "acceptProposedMilestones",
+                extraGas: 500000
             }), cb);
         }
     }], [{
