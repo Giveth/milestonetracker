@@ -66,6 +66,8 @@ Before actually encoding the list of Milestones, it is important to have specifi
 
 Once those details have been decided upon, you can go the js subfolder in this repository and use milestonetacker_helper.js to encode the Milestones. 
 
+## UPDATE JAN 27 2017 WE ARE BREAKING THIS TO ENABLE A WEB INTERFACE... THE FOLLOWING ONLY WORKS ON OLD DISTRIBUTIONS 
+
 In milestonetacker_helper.js there are the functions `milestones2bytes` and `bytes2milestones` which will enable the `recipient` to encode and decode a list of milestones.
 
 To use you can run:
