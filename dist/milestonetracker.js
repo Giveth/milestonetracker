@@ -28,11 +28,13 @@ var _vaultcontract = require("vaultcontract");
 
 var _vaultcontract2 = _interopRequireDefault(_vaultcontract);
 
+var _runethtx = require("runethtx");
+
+var _runethtx2 = _interopRequireDefault(_runethtx);
+
 var _MilestoneTrackerSol = require("../contracts/MilestoneTracker.sol.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -161,7 +163,7 @@ var MilestoneTracker = function () {
                     data = milestone.payData;
                 } else {
                     var vault = new _vaultcontract2.default(self.web3, milestone.paymentSource);
-                    data = vault.contract.authorizedPayments.getData(milestone.payRecipient, milestone.payDescription, milestone.payValue, milestone.payDelay || 0, { from: self.contract.address });
+                    data = vault.contract.authorizePayment.getData(milestone.payRecipient, milestone.payDescription, milestone.payValue, milestone.payDelay || 0, { from: self.contract.address });
                 }
 
                 return [new Buffer(milestone.description), new Buffer(milestone.url), n2buff(milestone.minCompletionDate), n2buff(milestone.maxCompletionDate), milestone.milestoneLeadLink, milestone.reviewer, n2buff(milestone.reviewTime), milestone.paymentSource, data];
@@ -178,16 +180,17 @@ var MilestoneTracker = function () {
 
             newOpts.contract = this.contract;
             newOpts.method = "proposeMilestones";
+            newOpts.extraGas = 50000;
 
             if (_typeof(newOpts.newMilestones) === "object") {
                 newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
             }
-            return runEthTx(newOpts, cb);
+            return (0, _runethtx2.default)(newOpts, cb);
         }
     }, {
         key: "unproposeMilestones",
         value: function unproposeMilestones(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "unproposeMilestones",
                 extraGas: 500000
@@ -196,7 +199,7 @@ var MilestoneTracker = function () {
     }, {
         key: "acceptProposedMilestones",
         value: function acceptProposedMilestones(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "acceptProposedMilestones",
                 extraGas: 500000
@@ -205,7 +208,7 @@ var MilestoneTracker = function () {
     }, {
         key: "changeArbitrator",
         value: function changeArbitrator(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeArbitrator",
                 extraGas: 5000
@@ -214,7 +217,7 @@ var MilestoneTracker = function () {
     }, {
         key: "changeDonor",
         value: function changeDonor(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeDonor",
                 extraGas: 5000
@@ -223,7 +226,7 @@ var MilestoneTracker = function () {
     }, {
         key: "changeRecipient",
         value: function changeRecipient(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeRecipient",
                 extraGas: 5000
@@ -232,7 +235,7 @@ var MilestoneTracker = function () {
     }, {
         key: "markMilestoneComplete",
         value: function markMilestoneComplete(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "markMilestoneComplete",
                 extraGas: 5000
@@ -241,7 +244,7 @@ var MilestoneTracker = function () {
     }, {
         key: "approveCompletedMilestone",
         value: function approveCompletedMilestone(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
                 extraGas: 5000
@@ -250,7 +253,7 @@ var MilestoneTracker = function () {
     }, {
         key: "rejectMilestone",
         value: function rejectMilestone(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
                 extraGas: 5000
@@ -259,7 +262,7 @@ var MilestoneTracker = function () {
     }, {
         key: "requestMilestonePayment",
         value: function requestMilestonePayment(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "requestMilestonePayment",
                 extraGas: 5000
@@ -268,7 +271,7 @@ var MilestoneTracker = function () {
     }, {
         key: "cancelMilestone",
         value: function cancelMilestone(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "cancelMilestone",
                 extraGas: 5000
@@ -277,7 +280,7 @@ var MilestoneTracker = function () {
     }, {
         key: "arbitrateApproveMilestone",
         value: function arbitrateApproveMilestone(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateApproveMilestone",
                 extraGas: 5000
@@ -286,7 +289,7 @@ var MilestoneTracker = function () {
     }, {
         key: "arbitrateCancelCampaign",
         value: function arbitrateCancelCampaign(opts, cb) {
-            return runEthTx(Object.assign({}, opts, {
+            return (0, _runethtx2.default)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateCancelCampaign",
                 extraGas: 5000
@@ -404,122 +407,5 @@ function pad(_n, width, _z) {
     var z = _z || "0";
     var n = _n.toString();
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-}
-
-function runEthTx(_ref, cb) {
-    var contract = _ref.contract,
-        method = _ref.method,
-        opts = _objectWithoutProperties(_ref, ["contract", "method"]);
-
-    var promise = new Promise(function (resolve, reject) {
-        if (!contract) {
-            reject(new Error("Contract not defined"));
-            return;
-        }
-
-        if (!method) {
-            // TODO send raw transaction to the contract.
-            reject(new Error("Method not defined"));
-            return;
-        }
-
-        var methodAbi = contract.abi.find(function (_ref2) {
-            var name = _ref2.name;
-            return name === method;
-        });
-
-        if (!methodAbi) {
-            reject(new Error("Invalid method"));
-            return;
-        }
-
-        var paramNames = methodAbi.inputs.map(function (_ref3) {
-            var name = _ref3.name;
-
-            if (name[0] === "_") {
-                return name.substring(1);
-            }
-            return name;
-        });
-
-        var fromAccount = void 0;
-        var gas = void 0;
-        var txHash = void 0;
-
-        _async2.default.series([function (cb1) {
-            if (opts.from) {
-                fromAccount = opts.from;
-                setImmediate(cb1);
-            } else {
-                // eslint-disable-next-line no-underscore-dangle
-                contract._eth.getAccounts(function (err, _accounts) {
-                    if (err) {
-                        cb1(err);return;
-                    }
-                    if (_accounts.length === 0) {
-                        cb1(new Error("No account to deploy a contract"));
-                        return;
-                    }
-                    fromAccount = _accounts[0];
-                    cb1();
-                });
-            }
-        }, function (cb1) {
-            var params = paramNames.map(function (name) {
-                return opts[name];
-            });
-            params.push({
-                from: fromAccount,
-                gas: 4000000
-            });
-            params.push(function (err, _gas) {
-                if (err) {
-                    cb1(err);
-                } else if (_gas >= 4000000) {
-                    cb1(new Error("throw"));
-                } else {
-                    gas = _gas;
-                    gas += opts.extraGas ? opts.extraGas : 10000;
-                    cb1();
-                }
-            });
-
-            contract[method].estimateGas.apply(null, params);
-        }, function (cb1) {
-            var params = paramNames.map(function (name) {
-                return opts[name];
-            });
-            params.push({
-                from: fromAccount,
-                gas: gas
-            });
-            params.push(function (err, _txHash) {
-                if (err) {
-                    cb1(err);
-                } else {
-                    txHash = _txHash;
-                    cb1();
-                }
-            });
-
-            contract[method].apply(null, params);
-        }], function (err) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(txHash);
-            }
-        });
-    });
-
-    if (cb) {
-        promise.then(function (value) {
-            cb(null, value);
-        }, function (reason) {
-            cb(null, reason);
-        });
-    } else {
-        return promise;
-    }
 }
 module.exports = exports["default"];
