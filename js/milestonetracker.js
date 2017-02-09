@@ -190,7 +190,7 @@ export default class MilestoneTracker {
                 data = milestone.payData;
             } else {
                 const vault = new Vault(self.web3, milestone.paymentSource);
-                data = vault.contract.authorizedPayments.getData(
+                data = vault.contract.authorizePayment.getData(
                             milestone.payRecipient,
                             milestone.payDescription,
                             milestone.payValue,
@@ -221,6 +221,7 @@ export default class MilestoneTracker {
 
         newOpts.contract = this.contract;
         newOpts.method = "proposeMilestones";
+        newOpts.extraGas = 50000;
 
         if (typeof newOpts.newMilestones === "object") {
             newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
