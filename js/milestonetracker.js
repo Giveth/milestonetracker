@@ -191,8 +191,8 @@ export default class MilestoneTracker {
             } else {
                 const vault = new Vault(self.web3, milestone.paymentSource);
                 data = vault.contract.authorizePayment.getData(
-                            milestone.payRecipient,
                             milestone.payDescription,
+                            milestone.payRecipient,
                             milestone.payValue,
                             milestone.payDelay || 0,
                             { from: self.contract.address });
