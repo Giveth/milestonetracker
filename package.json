@@ -1,6 +1,6 @@
 {
   "name": "milestonetracker",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "description": "Milestone Tracker contract",
   "main": "dist/milestonetracker.js",
   "directories": {
@@ -52,6 +52,6 @@
     "eslint-plugin-jsx": "0.0.2",
     "eslint-plugin-jsx-a11y": "^3.0.2",
     "eslint-plugin-react": "^6.9.0",
-    "ethconnector": "0.0.22"
+    "ethconnector": "0.0.24"
   }
 }
