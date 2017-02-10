@@ -3,7 +3,7 @@ import _ from "lodash";
 import rlp from "rlp";
 import BigNumber from "bignumber.js";
 import Vault from "vaultcontract";
-import runEthTx from "runethtx";
+import { deploy, send } from "runethtx";
 import { MilestoneTrackerAbi, MilestoneTrackerByteCode } from "../contracts/MilestoneTracker.sol.js";
 
 export default class MilestoneTracker {
@@ -109,52 +109,31 @@ export default class MilestoneTracker {
     }
 
     static deploy(web3, opts, cb) {
-        let account;
-        let milestoneTracker;
-        const contract = web3.eth.contract(MilestoneTrackerAbi);
-        async.series([
-            (cb1) => {
-                if (opts.from) {
-                    account = opts.from;
-                    cb1();
-                } else {
-                    web3.eth.getAccounts((err, _accounts) => {
-                        if (err) { cb1(err); return; }
-                        if (_accounts.length === 0) {
-                            cb1(new Error("No account to deploy a contract"));
-                            return;
-                        }
-                        account = _accounts[ 0 ];
-                        cb1();
-                    });
+        const params = Object.assign({}, opts);
+        const promise = new Promise((resolve, reject) => {
+            params.abi = MilestoneTrackerAbi;
+            params.byteCode = MilestoneTrackerByteCode;
+            return deploy(web3, params, (err, _milestoneTracker) => {
+                if (err) {
+                    reject(err);
+                    return;
                 }
-            },
-            (cb1) => {
-                contract.new(
-                    opts.arbitrator,
-                    opts.donor,
-                    opts.recipient,
-                    {
-                        from: account,
-                        data: MilestoneTrackerByteCode,
-                        gas: 3000000,
-                        value: opts.value || 0,
-                    },
-                    (err, _contract) => {
-                        if (err) { cb1(err); return; }
-                        if (typeof _contract.address !== "undefined") {
-                            milestoneTracker = new MilestoneTracker(web3, _contract.address);
-                            cb1();
-                        }
-                    });
-            },
-        ], (err) => {
-            if (err) {
-                cb(err);
-                return;
-            }
-            cb(null, milestoneTracker);
+                const milestoneTracker = new MilestoneTracker(web3, _milestoneTracker.address);
+                resolve(milestoneTracker);
+            });
         });
+
+        if (cb) {
+            promise.then(
+                (value) => {
+                    cb(null, value);
+                },
+                (reason) => {
+                    cb(reason);
+                });
+        } else {
+            return promise;
+        }
     }
 
     static bytes2milestones(b) {
@@ -163,11 +142,11 @@ export default class MilestoneTracker {
             const m = {
                 description: milestone[ 0 ].toString("utf8"),
                 url: milestone[ 1 ].toString("utf8"),
-                minCompletionDate: new BigNumber("0x" + milestone[ 2 ].toString("hex")),
-                maxCompletionDate: new BigNumber("0x" + milestone[ 3 ].toString("hex")),
+                minCompletionDate: new BigNumber("0x" + milestone[ 2 ].toString("hex")).toNumber(),
+                maxCompletionDate: new BigNumber("0x" + milestone[ 3 ].toString("hex")).toNumber(),
                 milestoneLeadLink: "0x" + milestone[ 4 ].toString("hex"),
                 reviewer: "0x" + milestone[ 5 ].toString("hex"),
-                reviewTime: new BigNumber("0x" + milestone[ 6 ].toString("hex")),
+                reviewTime: new BigNumber("0x" + milestone[ 6 ].toString("hex")).toNumber(),
                 paymentSource: "0x" + milestone[ 7 ].toString("hex"),
                 payData: "0x" + milestone[ 8 ].toString("hex"),
             };
@@ -226,11 +205,11 @@ export default class MilestoneTracker {
         if (typeof newOpts.newMilestones === "object") {
             newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
         }
-        return runEthTx(newOpts, cb);
+        return send(newOpts, cb);
     }
 
     unproposeMilestones(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "unproposeMilestones",
@@ -240,7 +219,7 @@ export default class MilestoneTracker {
     }
 
     acceptProposedMilestones(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "acceptProposedMilestones",
@@ -250,7 +229,7 @@ export default class MilestoneTracker {
     }
 
     changeArbitrator(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeArbitrator",
@@ -260,7 +239,7 @@ export default class MilestoneTracker {
     }
 
     changeDonor(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeDonor",
@@ -270,7 +249,7 @@ export default class MilestoneTracker {
     }
 
     changeRecipient(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeRecipient",
@@ -280,7 +259,7 @@ export default class MilestoneTracker {
     }
 
     markMilestoneComplete(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "markMilestoneComplete",
@@ -290,7 +269,7 @@ export default class MilestoneTracker {
     }
 
     approveCompletedMilestone(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
@@ -300,7 +279,7 @@ export default class MilestoneTracker {
     }
 
     rejectMilestone(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
@@ -310,7 +289,7 @@ export default class MilestoneTracker {
     }
 
     requestMilestonePayment(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "requestMilestonePayment",
@@ -320,7 +299,7 @@ export default class MilestoneTracker {
     }
 
     cancelMilestone(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "cancelMilestone",
@@ -330,7 +309,7 @@ export default class MilestoneTracker {
     }
 
     arbitrateApproveMilestone(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateApproveMilestone",
@@ -340,7 +319,7 @@ export default class MilestoneTracker {
     }
 
     arbitrateCancelCampaign(opts, cb) {
-        return runEthTx(
+        return send(
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateCancelCampaign",

@@ -30,8 +30,6 @@ var _vaultcontract2 = _interopRequireDefault(_vaultcontract);
 
 var _runethtx = require("runethtx");
 
-var _runethtx2 = _interopRequireDefault(_runethtx);
-
 var _MilestoneTrackerSol = require("../contracts/MilestoneTracker.sol.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -185,12 +183,12 @@ var MilestoneTracker = function () {
             if (_typeof(newOpts.newMilestones) === "object") {
                 newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
             }
-            return (0, _runethtx2.default)(newOpts, cb);
+            return (0, _runethtx.send)(newOpts, cb);
         }
     }, {
         key: "unproposeMilestones",
         value: function unproposeMilestones(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "unproposeMilestones",
                 extraGas: 500000
@@ -199,7 +197,7 @@ var MilestoneTracker = function () {
     }, {
         key: "acceptProposedMilestones",
         value: function acceptProposedMilestones(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "acceptProposedMilestones",
                 extraGas: 500000
@@ -208,7 +206,7 @@ var MilestoneTracker = function () {
     }, {
         key: "changeArbitrator",
         value: function changeArbitrator(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeArbitrator",
                 extraGas: 5000
@@ -217,7 +215,7 @@ var MilestoneTracker = function () {
     }, {
         key: "changeDonor",
         value: function changeDonor(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeDonor",
                 extraGas: 5000
@@ -226,7 +224,7 @@ var MilestoneTracker = function () {
     }, {
         key: "changeRecipient",
         value: function changeRecipient(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "changeRecipient",
                 extraGas: 5000
@@ -235,7 +233,7 @@ var MilestoneTracker = function () {
     }, {
         key: "markMilestoneComplete",
         value: function markMilestoneComplete(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "markMilestoneComplete",
                 extraGas: 5000
@@ -244,7 +242,7 @@ var MilestoneTracker = function () {
     }, {
         key: "approveCompletedMilestone",
         value: function approveCompletedMilestone(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
                 extraGas: 5000
@@ -253,7 +251,7 @@ var MilestoneTracker = function () {
     }, {
         key: "rejectMilestone",
         value: function rejectMilestone(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
                 extraGas: 5000
@@ -262,7 +260,7 @@ var MilestoneTracker = function () {
     }, {
         key: "requestMilestonePayment",
         value: function requestMilestonePayment(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "requestMilestonePayment",
                 extraGas: 5000
@@ -271,7 +269,7 @@ var MilestoneTracker = function () {
     }, {
         key: "cancelMilestone",
         value: function cancelMilestone(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "cancelMilestone",
                 extraGas: 5000
@@ -280,7 +278,7 @@ var MilestoneTracker = function () {
     }, {
         key: "arbitrateApproveMilestone",
         value: function arbitrateApproveMilestone(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateApproveMilestone",
                 extraGas: 5000
@@ -289,7 +287,7 @@ var MilestoneTracker = function () {
     }, {
         key: "arbitrateCancelCampaign",
         value: function arbitrateCancelCampaign(opts, cb) {
-            return (0, _runethtx2.default)(Object.assign({}, opts, {
+            return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateCancelCampaign",
                 extraGas: 5000
@@ -298,48 +296,29 @@ var MilestoneTracker = function () {
     }], [{
         key: "deploy",
         value: function deploy(web3, opts, cb) {
-            var account = void 0;
-            var milestoneTracker = void 0;
-            var contract = web3.eth.contract(_MilestoneTrackerSol.MilestoneTrackerAbi);
-            _async2.default.series([function (cb1) {
-                if (opts.from) {
-                    account = opts.from;
-                    cb1();
-                } else {
-                    web3.eth.getAccounts(function (err, _accounts) {
-                        if (err) {
-                            cb1(err);return;
-                        }
-                        if (_accounts.length === 0) {
-                            cb1(new Error("No account to deploy a contract"));
-                            return;
-                        }
-                        account = _accounts[0];
-                        cb1();
-                    });
-                }
-            }, function (cb1) {
-                contract.new(opts.arbitrator, opts.donor, opts.recipient, {
-                    from: account,
-                    data: _MilestoneTrackerSol.MilestoneTrackerByteCode,
-                    gas: 3000000,
-                    value: opts.value || 0
-                }, function (err, _contract) {
+            var params = Object.assign({}, opts);
+            var promise = new Promise(function (resolve, reject) {
+                params.abi = _MilestoneTrackerSol.MilestoneTrackerAbi;
+                params.byteCode = _MilestoneTrackerSol.MilestoneTrackerByteCode;
+                return (0, _runethtx.deploy)(web3, params, function (err, _milestoneTracker) {
                     if (err) {
-                        cb1(err);return;
+                        reject(err);
+                        return;
                     }
-                    if (typeof _contract.address !== "undefined") {
-                        milestoneTracker = new MilestoneTracker(web3, _contract.address);
-                        cb1();
-                    }
+                    var milestoneTracker = new MilestoneTracker(web3, _milestoneTracker.address);
+                    resolve(milestoneTracker);
                 });
-            }], function (err) {
-                if (err) {
-                    cb(err);
-                    return;
-                }
-                cb(null, milestoneTracker);
             });
+
+            if (cb) {
+                promise.then(function (value) {
+                    cb(null, value);
+                }, function (reason) {
+                    cb(reason);
+                });
+            } else {
+                return promise;
+            }
         }
     }, {
         key: "bytes2milestones",
@@ -349,11 +328,11 @@ var MilestoneTracker = function () {
                 var m = {
                     description: milestone[0].toString("utf8"),
                     url: milestone[1].toString("utf8"),
-                    minCompletionDate: new _bignumber2.default("0x" + milestone[2].toString("hex")),
-                    maxCompletionDate: new _bignumber2.default("0x" + milestone[3].toString("hex")),
+                    minCompletionDate: new _bignumber2.default("0x" + milestone[2].toString("hex")).toNumber(),
+                    maxCompletionDate: new _bignumber2.default("0x" + milestone[3].toString("hex")).toNumber(),
                     milestoneLeadLink: "0x" + milestone[4].toString("hex"),
                     reviewer: "0x" + milestone[5].toString("hex"),
-                    reviewTime: new _bignumber2.default("0x" + milestone[6].toString("hex")),
+                    reviewTime: new _bignumber2.default("0x" + milestone[6].toString("hex")).toNumber(),
                     paymentSource: "0x" + milestone[7].toString("hex"),
                     payData: "0x" + milestone[8].toString("hex")
                 };
