@@ -263,7 +263,7 @@ export default class MilestoneTracker {
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "markMilestoneComplete",
-                extraGas: 5000,
+                extraGas: 10000,
             }),
             cb);
     }
@@ -273,7 +273,7 @@ export default class MilestoneTracker {
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
-                extraGas: 5000,
+                extraGas: 25000,
             }),
             cb);
     }
@@ -282,8 +282,8 @@ export default class MilestoneTracker {
         return send(
             Object.assign({}, opts, {
                 contract: this.contract,
-                method: "approveCompletedMilestone",
-                extraGas: 5000,
+                method: "rejectMilestone",
+                extraGas: 25000,
             }),
             cb);
     }
@@ -293,7 +293,7 @@ export default class MilestoneTracker {
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "requestMilestonePayment",
-                extraGas: 5000,
+                extraGas: 25000,
             }),
             cb);
     }
@@ -303,7 +303,7 @@ export default class MilestoneTracker {
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "cancelMilestone",
-                extraGas: 5000,
+                extraGas: 25000,
             }),
             cb);
     }
@@ -313,7 +313,7 @@ export default class MilestoneTracker {
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateApproveMilestone",
-                extraGas: 5000,
+                extraGas: 25000,
             }),
             cb);
     }
@@ -323,9 +323,62 @@ export default class MilestoneTracker {
             Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateCancelCampaign",
-                extraGas: 5000,
+                extraGas: 25000,
             }),
             cb);
+    }
+
+    collectMilestone(opts, cb) {
+        const promise = new Promise((resolve, reject) => {
+            this.getState((err, st) => {
+                if (err) {
+                    reject(err);
+                }
+                const milestone = st.milestones[ opts.idMilestone ];
+                if ((!milestone) || (!milestone.payRecipient)) {
+                    reject(new Error("milestone not payable"));
+                }
+
+                const vault = new Vault(this.web3, milestone.paymentSource);
+
+                vault.getState((err2, vSt) => {
+                    if (err2) {
+                        reject(err2);
+                        return;
+                    }
+
+                    const idPayment = _.findIndex(vSt.payments,
+                        ({ description }) => (description === milestone.payDescription));
+
+                    if (typeof idPayment !== "number") {
+                        reject(new Error("Payment not found"));
+                    }
+
+                    vault.collectAuthorizedPayment({
+                        idPayment,
+                        from: vSt.payments[ idPayment ].recipient,
+                    }, (err3) => {
+                        if (err3) {
+                            reject(err3);
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+            });
+        });
+
+        if (cb) {
+            promise.then(
+                (value) => {
+                    cb(null, value);
+                },
+                (reason) => {
+                    cb(reason);
+                });
+        } else {
+            return promise;
+        }
     }
 }
 
@@ -336,7 +389,7 @@ function decodePayData(payData) {
     if (func === "8e637a33") {
         res.payDescription = extractString(payData, 0);
         res.payRecipient = extractAddress(payData, 1);
-        res.payValue = extractUInt(payData, 2).div(1e18).toNumber();
+        res.payValue = new BigNumber(extractUInt(payData, 2));
         res.payDelay = extractUInt(payData, 3).toNumber();
     }
     return res;

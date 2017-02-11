@@ -236,7 +236,7 @@ var MilestoneTracker = function () {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "markMilestoneComplete",
-                extraGas: 5000
+                extraGas: 10000
             }), cb);
         }
     }, {
@@ -245,7 +245,7 @@ var MilestoneTracker = function () {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
-                extraGas: 5000
+                extraGas: 25000
             }), cb);
         }
     }, {
@@ -253,8 +253,8 @@ var MilestoneTracker = function () {
         value: function rejectMilestone(opts, cb) {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
-                method: "approveCompletedMilestone",
-                extraGas: 5000
+                method: "rejectMilestone",
+                extraGas: 25000
             }), cb);
         }
     }, {
@@ -263,7 +263,7 @@ var MilestoneTracker = function () {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "requestMilestonePayment",
-                extraGas: 5000
+                extraGas: 25000
             }), cb);
         }
     }, {
@@ -272,7 +272,7 @@ var MilestoneTracker = function () {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "cancelMilestone",
-                extraGas: 5000
+                extraGas: 25000
             }), cb);
         }
     }, {
@@ -281,7 +281,7 @@ var MilestoneTracker = function () {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateApproveMilestone",
-                extraGas: 5000
+                extraGas: 25000
             }), cb);
         }
     }, {
@@ -290,8 +290,64 @@ var MilestoneTracker = function () {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "arbitrateCancelCampaign",
-                extraGas: 5000
+                extraGas: 25000
             }), cb);
+        }
+    }, {
+        key: "collectMilestone",
+        value: function collectMilestone(opts, cb) {
+            var _this2 = this;
+
+            var promise = new Promise(function (resolve, reject) {
+                _this2.getState(function (err, st) {
+                    if (err) {
+                        reject(err);
+                    }
+                    var milestone = st.milestones[opts.idMilestone];
+                    if (!milestone || !milestone.payRecipient) {
+                        reject(new Error("milestone not payable"));
+                    }
+
+                    var vault = new _vaultcontract2.default(_this2.web3, milestone.paymentSource);
+
+                    vault.getState(function (err2, vSt) {
+                        if (err2) {
+                            reject(err2);
+                            return;
+                        }
+
+                        var idPayment = _lodash2.default.findIndex(vSt.payments, function (_ref) {
+                            var description = _ref.description;
+                            return description === milestone.payDescription;
+                        });
+
+                        if (typeof idPayment !== "number") {
+                            reject(new Error("Payment not found"));
+                        }
+
+                        vault.collectAuthorizedPayment({
+                            idPayment: idPayment,
+                            from: vSt.payments[idPayment].recipient
+                        }, function (err3) {
+                            if (err3) {
+                                reject(err3);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    });
+                });
+            });
+
+            if (cb) {
+                promise.then(function (value) {
+                    cb(null, value);
+                }, function (reason) {
+                    cb(reason);
+                });
+            } else {
+                return promise;
+            }
         }
     }], [{
         key: "deploy",
@@ -356,7 +412,7 @@ function decodePayData(payData) {
     if (func === "8e637a33") {
         res.payDescription = extractString(payData, 0);
         res.payRecipient = extractAddress(payData, 1);
-        res.payValue = extractUInt(payData, 2).div(1e18).toNumber();
+        res.payValue = new _bignumber2.default(extractUInt(payData, 2));
         res.payDelay = extractUInt(payData, 3).toNumber();
     }
     return res;

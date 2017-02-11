@@ -321,6 +321,8 @@ describe("Normal Scenario Milestone test", () => {
     let milestonesBytes;
     let milestones;
 
+    let now;
+
     before((done) => {
 //        ethConnector.init('rpc', function(err) {
         ethConnector.init("testrpc", { gasLimit: 4000000 }, (err) => {
@@ -376,6 +378,27 @@ describe("Normal Scenario Milestone test", () => {
             done();
         });
     }).timeout(200000);
+    it("should add ether to the vault", (done) => {
+        ethConnector.web3.eth.sendTransaction({
+            from: ethConnector.accounts[ 0 ],
+            to: vault.contract.address,
+            value: ethConnector.web3.toWei(10),
+        }, (err) => {
+            assert.ifError(err);
+            ethConnector.web3.eth.getBalance(vault.contract.address, (err2, res) => {
+                assert.ifError(err2);
+                assert.equal(ethConnector.web3.fromWei(res), 10);
+                done();
+            });
+        });
+    }).timeout(20000);
+    it("Should check balance", (done) => {
+        ethConnector.web3.eth.getBalance(vault.contract.address, (err2, res) => {
+            assert.ifError(err2);
+            assert.equal(ethConnector.web3.fromWei(res), 10);
+            done();
+        });
+    });
     it("Should authorize milestoneTracker as spender", (done) => {
         vault.contract.authorizeSpender(milestoneTracker.contract.address, true, {
             from: owner,
@@ -392,9 +415,14 @@ describe("Normal Scenario Milestone test", () => {
     it("Stp0: Should not allow any action before creating the proposals", (done) => {
         checkStep(0, done);
     });
+    it("Get Now", (done) => {
+        ethConnector.web3.eth.getBlock("latest", (err, block) => {
+            assert.ifError(err);
+            now = block.timestamp;
+            done();
+        });
+    });
     it("Stp1: Should propose the proposal", (done) => {
-        const now = Math.floor(new Date().getTime() / 1000);
-
         milestones = [];
         for (let i = 0; i < 4; i += 1) {
             milestones.push({
@@ -406,11 +434,11 @@ describe("Normal Scenario Milestone test", () => {
                 milestoneLeadLink,
                 reviewTime: 86400 * 2,
                 paymentSource: vault.contract.address,
-                payData: vault.contract.authorizePayment.getData("Proposal " + i, recipient, ethConnector.web3.toWei(i), 0),
+                payData: vault.contract.authorizePayment.getData("Proposal " + i, recipient, ethConnector.web3.toWei(i + 1), 0),
                 status: "AcceptedAndInProgress",
                 payDescription: "Proposal " + i,
                 payRecipient: recipient,
-                payValue: i,
+                payValue: new BigNumber(ethConnector.web3.toWei(i + 1)),
                 payDelay: 0,
                 doneTime: 0,
             });
@@ -420,17 +448,18 @@ describe("Normal Scenario Milestone test", () => {
         const calcMilestones1 = MilestoneTracker.bytes2milestones(milestonesBytes);
         assert.deepEqual(normalizeMilestones(milestones), normalizeMilestones(calcMilestones1));
 
-        milestoneTracker.proposeMilestones({ newMilestones: milestones, from: recipient }, (err) => {
-            assert.ifError(err);
-            milestoneTracker.contract.proposedMilestones((err2, res) => {
-                assert.ifError(err2);
-                assert.equal(res, milestonesBytes);
-                const calcMilestones = MilestoneTracker.bytes2milestones(res);
-                assert.deepEqual(normalizeMilestones(milestones),
-                    normalizeMilestones(calcMilestones));
-                checkStep(1, done);
+        milestoneTracker.proposeMilestones({ newMilestones: milestones, from: recipient },
+            (err) => {
+                assert.ifError(err);
+                milestoneTracker.contract.proposedMilestones((err2, res) => {
+                    assert.ifError(err2);
+                    assert.equal(res, milestonesBytes);
+                    const calcMilestones = MilestoneTracker.bytes2milestones(res);
+                    assert.deepEqual(normalizeMilestones(milestones),
+                        normalizeMilestones(calcMilestones));
+                    checkStep(1, done);
+                });
             });
-        });
     });
     it("Stp2: Should approve the proposals", (done) => {
         milestoneTracker.contract.acceptProposedMilestones(
@@ -448,8 +477,11 @@ describe("Normal Scenario Milestone test", () => {
             });
     }).timeout(20000);
     it("Should delay until proposals are doable", (done) => {
-        bcDelay(86400 + 1, done);
-    });
+        bcDelay(86400 + 100, done);
+    }).timeout(30000);
+    it("should delay don't know why", (done) => {
+        setTimeout(done, 5000);
+    }).timeout(30000);
     it("Stp3: Mark proposals as done", (done) => {
         checkStep(3, done);
     }).timeout(20000);
@@ -458,18 +490,26 @@ describe("Normal Scenario Milestone test", () => {
     }).timeout(10000);
     it("Step5: Complete and force aprove", (done) => {
         checkStep(5, done);
-    });
+    }).timeout(10000);
     it("Should delay until proposal aproves automatically", (done) => {
         bcDelay((86400 * 2) + 1, done);
-    });
+    }).timeout(10000);
     it("Step6: Collect", (done) => {
         checkStep(6, done);
     });
     it("Should delay until proposals expires", (done) => {
         bcDelay(86400 + 1, done);
-    });
+    }).timeout(10000);
     it("Step7: Expiration", (done) => {
         checkStep(7, done);
+    });
+    it("Should delay until proposals are collectable", (done) => {
+        bcDelay((86400 * 5) + 1, done);
+    }).timeout(10000);
+    it("Should collect moneys", (done) => {
+        milestoneTracker.collectMilestone({
+            idMilestone: 0,
+        }, done);
     });
 
     function checkStep(step, cb) {
@@ -502,18 +542,17 @@ describe("Normal Scenario Milestone test", () => {
             return;
         }
         log("Proposa: " + proposal + " Action: " + action + " Sender: " + caller[ action ]);
-        milestoneTracker.contract[ action ](proposal,
-            {
-                from: caller[ action ],
-                gas: 2000000,
-            }, (err) => {
-                assert.ifError(err);
-                milestoneTracker.contract.milestones(proposal, (err2, res) => {
-                    assert.ifError(err2);
-                    log("Proposal: " + JSON.stringify(res));
-                    cb();
-                });
+        milestoneTracker[ action ]({
+            idMilestone: proposal,
+            from: caller[ action ],
+        }, (err) => {
+            assert.ifError(err);
+            milestoneTracker.contract.milestones(proposal, (err2, res) => {
+                assert.ifError(err2);
+                log("Proposal: " + JSON.stringify(res));
+                cb();
             });
+        });
     }
 
     function checkPayment(proposal, cb) {
@@ -547,12 +586,12 @@ describe("Normal Scenario Milestone test", () => {
             (cb1) => {
                 const now = Math.floor(new Date().getTime() / 1000);
                 assert.equal(payment[ 1 ], milestoneTracker.contract.address);
-                assert(payment[ 2 ].toNumber() >= (now + (86400 * 3)) - 15);
-                assert(payment[ 2 ].toNumber() <= (now + (86400 * 3)) + 15);
+                assert(payment[ 2 ].toNumber() >= (now + (86400 * 3)) - 150);
+                assert(payment[ 2 ].toNumber() <= (now + (86400 * 3)) + 150);
                 assert.equal(payment[ 3 ], false);  // canceled
                 assert.equal(payment[ 4 ], false);  // payed
                 assert.equal(payment[ 5 ], recipient);
-                assert.equal(payment[ 6 ], ethConnector.web3.toWei(i));
+                assert.equal(payment[ 6 ], ethConnector.web3.toWei(i + 1));
                 cb1();
             },
         ], cb);
@@ -586,13 +625,40 @@ describe("Normal Scenario Milestone test", () => {
     }
 
     function bcDelay(secs, cb) {
+        send("evm_increaseTime", [secs], function(err, result) {
+            if (err) return cb(err);
+
+      // Mine a block so new time is recorded.
+            send("evm_mine", function(err, result) {
+                if (err) return cb(err);
+                cb();
+            });
+        });
+    }
+
+        // CALL a low level rpc
+    function send(method, params, callback) {
+        if (typeof params === "function") {
+            callback = params;
+            params = [];
+        }
+
+        ethConnector.web3.currentProvider.sendAsync({
+            jsonrpc: "2.0",
+            method,
+            params: params || [],
+            id: new Date().getTime(),
+        }, callback);
+    }
+/*
+    function bcDelay(secs, cb) {
         send("evm_increaseTime", [ secs ], (err) => {
             if (err) { cb(err); return; }
 
       // Mine a block so new time is recorded.
             send("evm_mine", (err1) => {
                 if (err1) { cb(err); return; }
-                cb();
+                setTimeout(cb, 2000);
             });
         });
     }
@@ -616,7 +682,7 @@ describe("Normal Scenario Milestone test", () => {
             id: new Date().getTime(),
         }, callback);
     }
-
+*/
     function log(S) {
         if (verbose) {
             console.log(S);
