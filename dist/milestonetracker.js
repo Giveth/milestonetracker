@@ -245,7 +245,7 @@ var MilestoneTracker = function () {
             return (0, _runethtx.send)(Object.assign({}, opts, {
                 contract: this.contract,
                 method: "approveCompletedMilestone",
-                extraGas: 25000
+                extraGas: 100000
             }), cb);
         }
     }, {
