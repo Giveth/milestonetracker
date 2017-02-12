@@ -46,105 +46,107 @@ var MilestoneTracker = function () {
 
     _createClass(MilestoneTracker, [{
         key: "getState",
-        value: function getState(cb) {
+        value: function getState(_cb) {
             var _this = this;
 
-            var st = {};
-            var nMilestones = void 0;
-            _async2.default.series([function (cb1) {
-                _this.contract.recipient(function (err, _recipient) {
-                    if (err) {
-                        cb1(err);return;
-                    }
-                    st.recipient = _recipient;
-                    cb1();
-                });
-            }, function (cb1) {
-                _this.contract.donor(function (err, _donor) {
-                    if (err) {
-                        cb1(err);return;
-                    }
-                    st.donor = _donor;
-                    cb1();
-                });
-            }, function (cb1) {
-                _this.contract.arbitrator(function (err, _arbitrator) {
-                    if (err) {
-                        cb1(err);return;
-                    }
-                    st.arbitrator = _arbitrator;
-                    cb1();
-                });
-            }, function (cb1) {
-                _this.contract.campaignCanceled(function (err, res) {
-                    if (err) {
-                        cb1(err);return;
-                    }
-                    st.campaignCanceled = res;
-                    cb1();
-                });
-            }, function (cb1) {
-                _this.contract.numberOfMilestones(function (err, res) {
-                    if (err) {
-                        cb1(err);return;
-                    }
-                    nMilestones = res.toNumber();
-                    st.milestones = [];
-                    cb1();
-                });
-            }, function (cb1) {
-                _async2.default.eachSeries(_lodash2.default.range(0, nMilestones), function (idMilestone, cb2) {
-                    _this.contract.milestones(idMilestone, function (err, res) {
+            return (0, _runethtx.asyncfunc)(function (cb) {
+                var st = {};
+                var nMilestones = void 0;
+                _async2.default.series([function (cb1) {
+                    _this.contract.recipient(function (err, _recipient) {
                         if (err) {
-                            cb2(err);return;
+                            cb1(err);return;
                         }
-                        var milestoneStatus = ["AcceptedAndInProgress", "Completed", "AuthorizedForPayment", "Canceled"];
-                        var m = {
-                            description: res[0],
-                            url: res[1],
-                            minCompletionDate: res[2].toNumber(),
-                            maxCompletionDate: res[3].toNumber(),
-                            milestoneLeadLink: res[4],
-                            reviewer: res[5],
-                            reviewTime: res[6].toNumber(),
-                            paymentSource: res[7],
-                            payData: res[8],
-                            status: milestoneStatus[res[9].toNumber()],
-                            doneTime: res[10].toNumber()
-                        };
-                        Object.assign(m, decodePayData(m.payData));
-                        st.milestones.push(m);
-                        cb2();
+                        st.recipient = _recipient;
+                        cb1();
                     });
-                }, cb1);
-            }, function (cb1) {
-                _this.contract.changingMilestones(function (err, res) {
-                    if (err) {
-                        cb1(err);return;
+                }, function (cb1) {
+                    _this.contract.donor(function (err, _donor) {
+                        if (err) {
+                            cb1(err);return;
+                        }
+                        st.donor = _donor;
+                        cb1();
+                    });
+                }, function (cb1) {
+                    _this.contract.arbitrator(function (err, _arbitrator) {
+                        if (err) {
+                            cb1(err);return;
+                        }
+                        st.arbitrator = _arbitrator;
+                        cb1();
+                    });
+                }, function (cb1) {
+                    _this.contract.campaignCanceled(function (err, res) {
+                        if (err) {
+                            cb1(err);return;
+                        }
+                        st.campaignCanceled = res;
+                        cb1();
+                    });
+                }, function (cb1) {
+                    _this.contract.numberOfMilestones(function (err, res) {
+                        if (err) {
+                            cb1(err);return;
+                        }
+                        nMilestones = res.toNumber();
+                        st.milestones = [];
+                        cb1();
+                    });
+                }, function (cb1) {
+                    _async2.default.eachSeries(_lodash2.default.range(0, nMilestones), function (idMilestone, cb2) {
+                        _this.contract.milestones(idMilestone, function (err, res) {
+                            if (err) {
+                                cb2(err);return;
+                            }
+                            var milestoneStatus = ["AcceptedAndInProgress", "Completed", "AuthorizedForPayment", "Canceled"];
+                            var m = {
+                                description: res[0],
+                                url: res[1],
+                                minCompletionDate: res[2].toNumber(),
+                                maxCompletionDate: res[3].toNumber(),
+                                milestoneLeadLink: res[4],
+                                reviewer: res[5],
+                                reviewTime: res[6].toNumber(),
+                                paymentSource: res[7],
+                                payData: res[8],
+                                status: milestoneStatus[res[9].toNumber()],
+                                doneTime: res[10].toNumber()
+                            };
+                            Object.assign(m, decodePayData(m.payData));
+                            st.milestones.push(m);
+                            cb2();
+                        });
+                    }, cb1);
+                }, function (cb1) {
+                    _this.contract.changingMilestones(function (err, res) {
+                        if (err) {
+                            cb1(err);return;
+                        }
+                        st.changingMilestones = res;
+                        cb1();
+                    });
+                }, function (cb1) {
+                    if (!st.changingMilestones) {
+                        cb1();
+                        return;
                     }
-                    st.changingMilestones = res;
-                    cb1();
-                });
-            }, function (cb1) {
-                if (!st.changingMilestones) {
-                    cb1();
-                    return;
-                }
-                _this.contract.proposedMilestones(function (err, res) {
+                    _this.contract.proposedMilestones(function (err, res) {
+                        if (err) {
+                            cb1(err);return;
+                        }
+                        st.proposedMilestonesData = res;
+                        st.proposedMilestonesHash = "0x" + _this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
+                        st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
+                        cb1();
+                    });
+                }], function (err) {
                     if (err) {
-                        cb1(err);return;
+                        cb(err);return;
                     }
-                    st.proposedMilestonesData = res;
-                    st.proposedMilestonesHash = "0x" + _this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
-                    st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
-                    cb1();
+                    cb(null, st);
                 });
-            }], function (err) {
-                if (err) {
-                    cb(err);return;
-                }
-                cb(null, st);
-            });
+            }, _cb);
         }
     }, {
         key: "milestones2bytes",
@@ -175,144 +177,107 @@ var MilestoneTracker = function () {
         value: function proposeMilestones(opts, cb) {
             var self = this;
             var newOpts = Object.assign({}, opts);
-
-            newOpts.contract = this.contract;
-            newOpts.method = "proposeMilestones";
-            newOpts.extraGas = 50000;
-
             if (_typeof(newOpts.newMilestones) === "object") {
                 newOpts.newMilestones = self.milestones2bytes(newOpts.newMilestones);
             }
-            return (0, _runethtx.send)(newOpts, cb);
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "proposeMilestones", newOpts, cb);
         }
     }, {
         key: "unproposeMilestones",
         value: function unproposeMilestones(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "unproposeMilestones",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "unproposeMilestones", Object.assign({}, opts, {
                 extraGas: 500000
             }), cb);
         }
     }, {
         key: "acceptProposedMilestones",
         value: function acceptProposedMilestones(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "acceptProposedMilestones",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "acceptProposedMilestones", Object.assign({}, opts, {
                 extraGas: 500000
             }), cb);
         }
     }, {
         key: "changeArbitrator",
         value: function changeArbitrator(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "changeArbitrator",
-                extraGas: 5000
-            }), cb);
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "changeArbitrator", opts, cb);
         }
     }, {
         key: "changeDonor",
         value: function changeDonor(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "changeDonor",
-                extraGas: 5000
-            }), cb);
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "changeDonor", opts, cb);
         }
     }, {
         key: "changeRecipient",
         value: function changeRecipient(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "changeRecipient",
-                extraGas: 5000
-            }), cb);
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "changeRecipient", opts, cb);
         }
     }, {
         key: "markMilestoneComplete",
         value: function markMilestoneComplete(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "markMilestoneComplete",
-                extraGas: 10000
-            }), cb);
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "markMilestoneComplete", opts, cb);
         }
     }, {
         key: "approveCompletedMilestone",
         value: function approveCompletedMilestone(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "approveCompletedMilestone",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "approveCompletedMilestone", Object.assign({}, opts, {
                 extraGas: 100000
             }), cb);
         }
     }, {
         key: "rejectMilestone",
         value: function rejectMilestone(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "rejectMilestone",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "rejectMilestone", Object.assign({}, opts, {
                 extraGas: 25000
             }), cb);
         }
     }, {
         key: "requestMilestonePayment",
         value: function requestMilestonePayment(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "requestMilestonePayment",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "requestMilestonePayment", Object.assign({}, opts, {
                 extraGas: 25000
             }), cb);
         }
     }, {
         key: "cancelMilestone",
         value: function cancelMilestone(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "cancelMilestone",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "cancelMilestone", Object.assign({}, opts, {
                 extraGas: 25000
             }), cb);
         }
     }, {
         key: "arbitrateApproveMilestone",
         value: function arbitrateApproveMilestone(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "arbitrateApproveMilestone",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "arbitrateApproveMilestone", Object.assign({}, opts, {
                 extraGas: 25000
             }), cb);
         }
     }, {
         key: "arbitrateCancelCampaign",
         value: function arbitrateCancelCampaign(opts, cb) {
-            return (0, _runethtx.send)(Object.assign({}, opts, {
-                contract: this.contract,
-                method: "arbitrateCancelCampaign",
+            return (0, _runethtx.sendContractTx)(this.web3, this.contract, "arbitrateCancelCampaign", Object.assign({}, opts, {
                 extraGas: 25000
             }), cb);
         }
     }, {
         key: "collectMilestone",
-        value: function collectMilestone(opts, cb) {
+        value: function collectMilestone(opts, _cb) {
             var _this2 = this;
 
-            var promise = new Promise(function (resolve, reject) {
+            return (0, _runethtx.asyncfunc)(function (cb) {
                 _this2.getState(function (err, st) {
                     if (err) {
-                        reject(err);
+                        cb(err);
                     }
                     var milestone = st.milestones[opts.idMilestone];
                     if (!milestone || !milestone.payRecipient) {
-                        reject(new Error("milestone not payable"));
+                        cb(new Error("milestone not payable"));
                     }
 
                     var vault = new _vaultcontract2.default(_this2.web3, milestone.paymentSource);
 
                     vault.getState(function (err2, vSt) {
                         if (err2) {
-                            reject(err2);
+                            cb(err2);
                             return;
                         }
 
@@ -322,7 +287,7 @@ var MilestoneTracker = function () {
                         });
 
                         if (typeof idPayment !== "number") {
-                            reject(new Error("Payment not found"));
+                            cb(new Error("Payment not found"));
                         }
 
                         vault.collectAuthorizedPayment({
@@ -330,51 +295,31 @@ var MilestoneTracker = function () {
                             from: vSt.payments[idPayment].recipient
                         }, function (err3) {
                             if (err3) {
-                                reject(err3);
+                                cb(err3);
                             } else {
-                                resolve();
+                                cb();
                             }
                         });
                     });
                 });
-            });
-
-            if (cb) {
-                promise.then(function (value) {
-                    cb(null, value);
-                }, function (reason) {
-                    cb(reason);
-                });
-            } else {
-                return promise;
-            }
+            }, _cb);
         }
     }], [{
         key: "deploy",
-        value: function deploy(web3, opts, cb) {
-            var params = Object.assign({}, opts);
-            var promise = new Promise(function (resolve, reject) {
+        value: function deploy(web3, opts, _cb) {
+            return (0, _runethtx.asyncfunc)(function (cb) {
+                var params = Object.assign({}, opts);
                 params.abi = _MilestoneTrackerSol.MilestoneTrackerAbi;
                 params.byteCode = _MilestoneTrackerSol.MilestoneTrackerByteCode;
                 return (0, _runethtx.deploy)(web3, params, function (err, _milestoneTracker) {
                     if (err) {
-                        reject(err);
+                        cb(err);
                         return;
                     }
                     var milestoneTracker = new MilestoneTracker(web3, _milestoneTracker.address);
-                    resolve(milestoneTracker);
+                    cb(null, milestoneTracker);
                 });
-            });
-
-            if (cb) {
-                promise.then(function (value) {
-                    cb(null, value);
-                }, function (reason) {
-                    cb(reason);
-                });
-            } else {
-                return promise;
-            }
+            }, _cb);
         }
     }, {
         key: "bytes2milestones",
