@@ -98,7 +98,10 @@ export default class MilestoneTracker {
                     this.contract.proposedMilestones((err, res) => {
                         if (err) { cb1(err); return; }
                         st.proposedMilestonesData = res;
-                        st.proposedMilestonesHash = "0x" + this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
+                        st.proposedMilestonesHash = this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
+                        if (st.proposedMilestonesHash.substr(0, 2) !== "0x") {
+                            st.proposedMilestonesHash = "0x" + st.proposedMilestonesHash;
+                        }
                         st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
                         cb1();
                     });
@@ -215,7 +218,7 @@ export default class MilestoneTracker {
             this.contract,
             "acceptProposedMilestones",
             Object.assign({}, opts, {
-                extraGas: 500000,
+                extraGas: 1000000,
             }),
             cb);
     }

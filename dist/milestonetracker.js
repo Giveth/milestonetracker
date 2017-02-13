@@ -136,7 +136,10 @@ var MilestoneTracker = function () {
                             cb1(err);return;
                         }
                         st.proposedMilestonesData = res;
-                        st.proposedMilestonesHash = "0x" + _this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
+                        st.proposedMilestonesHash = _this.web3.sha3(st.proposedMilestonesData, { encoding: "hex" });
+                        if (st.proposedMilestonesHash.substr(0, 2) !== "0x") {
+                            st.proposedMilestonesHash = "0x" + st.proposedMilestonesHash;
+                        }
                         st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
                         cb1();
                     });
@@ -193,7 +196,7 @@ var MilestoneTracker = function () {
         key: "acceptProposedMilestones",
         value: function acceptProposedMilestones(opts, cb) {
             return (0, _runethtx.sendContractTx)(this.web3, this.contract, "acceptProposedMilestones", Object.assign({}, opts, {
-                extraGas: 500000
+                extraGas: 1000000
             }), cb);
         }
     }, {
