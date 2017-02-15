@@ -415,11 +415,11 @@ var MilestoneTracker = function () {
                         vault.collectAuthorizedPayment({
                             idPayment: idPayment,
                             from: vSt.payments[idPayment].recipient
-                        }, function (err3) {
+                        }, function (err3, txHash) {
                             if (err3) {
                                 cb(err3);
                             } else {
-                                cb();
+                                cb(null, txHash);
                             }
                         });
                     });

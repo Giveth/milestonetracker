@@ -591,11 +591,11 @@ export default class MilestoneTracker {
                     vault.collectAuthorizedPayment({
                         idPayment,
                         from: vSt.payments[ idPayment ].recipient,
-                    }, (err3) => {
+                    }, (err3, txHash) => {
                         if (err3) {
                             cb(err3);
                         } else {
-                            cb();
+                            cb(null, txHash);
                         }
                     });
                 });
