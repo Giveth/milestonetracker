@@ -1,6 +1,6 @@
 {
   "name": "milestonetracker",
-  "version": "0.1.34",
+  "version": "0.1.35",
   "description": "Milestone Tracker contract",
   "main": "dist/milestonetracker.js",
   "directories": {
@@ -39,7 +39,7 @@
     "multisigwallet": "0.0.2",
     "rlp": "^2.0.0",
     "runethtx": "0.0.7",
-    "vaultcontract": "0.2.14"
+    "vaultcontract": "0.2.15"
   },
   "devDependencies": {
     "babel-core": "^6.22.1",
