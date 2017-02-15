@@ -28,11 +28,17 @@ var _vaultcontract = require("vaultcontract");
 
 var _vaultcontract2 = _interopRequireDefault(_vaultcontract);
 
+var _multisigwallet = require("multisigwallet");
+
+var _multisigwallet2 = _interopRequireDefault(_multisigwallet);
+
 var _runethtx = require("runethtx");
 
 var _MilestoneTrackerSol = require("../contracts/MilestoneTracker.sol.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -95,28 +101,113 @@ var MilestoneTracker = function () {
                     });
                 }, function (cb1) {
                     _async2.default.eachSeries(_lodash2.default.range(0, nMilestones), function (idMilestone, cb2) {
-                        _this.contract.milestones(idMilestone, function (err, res) {
-                            if (err) {
-                                cb2(err);return;
+                        var milestone = void 0;
+                        _async2.default.series([function (cb3) {
+                            _this.contract.milestones(idMilestone, function (err, res) {
+                                if (err) {
+                                    cb3(err);return;
+                                }
+                                var milestoneStatus = ["AcceptedAndInProgress", "Completed", "AuthorizedForPayment", "Canceled"];
+                                milestone = {
+                                    description: res[0],
+                                    url: res[1],
+                                    minCompletionDate: res[2].toNumber(),
+                                    maxCompletionDate: res[3].toNumber(),
+                                    milestoneLeadLink: res[4],
+                                    reviewer: res[5],
+                                    reviewTime: res[6].toNumber(),
+                                    paymentSource: res[7],
+                                    payData: res[8],
+                                    status: milestoneStatus[res[9].toNumber()],
+                                    doneTime: res[10].toNumber()
+                                };
+                                Object.assign(milestone, decodePayData(milestone.payData));
+                                st.milestones.push(milestone);
+                                cb3();
+                            });
+                        }, function (cb3) {
+                            if (milestone.status !== "AuthorizedForPayment" || !milestone.payRecipient) {
+                                cb3();
+                                return;
                             }
-                            var milestoneStatus = ["AcceptedAndInProgress", "Completed", "AuthorizedForPayment", "Canceled"];
-                            var m = {
-                                description: res[0],
-                                url: res[1],
-                                minCompletionDate: res[2].toNumber(),
-                                maxCompletionDate: res[3].toNumber(),
-                                milestoneLeadLink: res[4],
-                                reviewer: res[5],
-                                reviewTime: res[6].toNumber(),
-                                paymentSource: res[7],
-                                payData: res[8],
-                                status: milestoneStatus[res[9].toNumber()],
-                                doneTime: res[10].toNumber()
-                            };
-                            Object.assign(m, decodePayData(m.payData));
-                            st.milestones.push(m);
-                            cb2();
-                        });
+                            var vault = new _vaultcontract2.default(_this.web3, milestone.paymentSource);
+                            vault.getState(function (err, vSt) {
+                                if (err) {
+                                    cb3(err);
+                                    return;
+                                }
+
+                                milestone.paymentInfo = _lodash2.default.find(vSt.payments, function (_ref) {
+                                    var description = _ref.description;
+                                    return description === milestone.payDescription;
+                                });
+
+                                cb3();
+                            });
+                        }, function (cb3) {
+                            milestone.actions = {};
+
+                            var now = Math.floor(new Date().getTime() / 1000);
+                            if (milestone.status !== "AcceptedAndInProgress" || now < milestone.minCompletionDate || now > milestone.maxCompletionDate) {
+                                cb3();
+                                return;
+                            }
+
+                            milestone.actions.markMilestoneComplete = [];
+                            addActionOptions(_this.web3, milestone.actions.markMilestoneComplete, [milestone.milestoneLeadLink, st.recipient], _this.contract.address, 0, _this.contract.markMilestoneComplete.getData(idMilestone), cb3);
+                        }, function (cb3) {
+                            if (milestone.status !== "Completed") {
+                                cb3();
+                                return;
+                            }
+
+                            milestone.actions.approveCompletedMilestone = [];
+                            addActionOptions(_this.web3, milestone.actions.approveCompletedMilestone, [milestone.reviewer], _this.contract.address, 0, _this.contract.approveCompletedMilestone.getData(idMilestone), cb3);
+                        }, function (cb3) {
+                            if (milestone.status !== "Completed") {
+                                cb3();
+                                return;
+                            }
+
+                            milestone.actions.rejectMilestone = [];
+                            addActionOptions(_this.web3, milestone.actions.rejectMilestone, [milestone.reviewer], _this.contract.address, 0, _this.contract.rejectMilestone.getData(idMilestone), cb3);
+                        }, function (cb3) {
+                            var now = Math.floor(new Date().getTime() / 1000);
+                            if (milestone.status !== "Completed" || now < milestone.doneTime + milestone.reviewTime) {
+                                cb3();
+                                return;
+                            }
+
+                            milestone.actions.requestMilestonePayment = [];
+                            addActionOptions(_this.web3, milestone.actions.requestMilestonePayment, [milestone.milestoneLeadLink, st.recipient], _this.contract.address, 0, _this.contract.requestMilestonePayment.getData(idMilestone), cb3);
+                        }, function (cb3) {
+                            if (milestone.status !== "AcceptedAndInProgress" && milestone.status !== "Completed") {
+                                cb3();
+                                return;
+                            }
+
+                            milestone.actions.cancelMilestone = [];
+                            addActionOptions(_this.web3, milestone.actions.cancelMilestone, [st.recipient], _this.contract.address, 0, _this.contract.cancelMilestone.getData(idMilestone), cb3);
+                        }, function (cb3) {
+                            if (milestone.status !== "AcceptedAndInProgress" && milestone.status !== "Completed") {
+                                cb3();
+                                return;
+                            }
+
+                            milestone.actions.arbitrateApproveMilestone = [];
+                            addActionOptions(_this.web3, milestone.actions.arbitrateApproveMilestone, [st.arbitrator], _this.contract.address, 0, _this.contract.arbitrateApproveMilestone.getData(idMilestone), cb3);
+                        }, function (cb3) {
+                            var now = Math.floor(new Date().getTime() / 1000);
+                            if (milestone.status !== "AuthorizedForPayment" || milestone.paymentInfo.paid || now < milestone.paymentInfo.earliestPayTime) {
+                                cb3();
+                                return;
+                            }
+
+                            var vault = new _vaultcontract2.default(_this.web3, milestone.paymentSource);
+
+                            milestone.actions.collectMilestone = [];
+                            addActionOptions(_this.web3, milestone.actions.collectMilestone, [milestone.payRecipient], milestone.paymentSource, 0, vault.contract.collectAuthorizedPayment.getData(milestone.paymentInfo.idPayment), cb3);
+                        }], cb2);
                     }, cb1);
                 }, function (cb1) {
                     _this.contract.changingMilestones(function (err, res) {
@@ -143,6 +234,34 @@ var MilestoneTracker = function () {
                         st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
                         cb1();
                     });
+                }, function (cb1) {
+                    st.actions = {};
+                    if (st.changingMilestones) {
+                        cb1();
+                        return;
+                    }
+
+                    st.actions.proposeMilestones = [];
+                    addActionOptions(_this.web3, st.actions.proposeMilestones, [st.recipient], _this.contract.address, 0, _this.contract.proposeMilestones.getData("0x10"), cb1);
+                }, function (cb1) {
+                    if (!st.changingMilestones) {
+                        cb1();
+                        return;
+                    }
+
+                    st.actions.unproposeMilestones = [];
+                    addActionOptions(_this.web3, st.actions.unproposeMilestones, [st.recipient], _this.contract.address, 0, _this.contract.unproposeMilestones.getData(), cb1);
+                }, function (cb1) {
+                    if (!st.changingMilestones) {
+                        cb1();
+                        return;
+                    }
+
+                    st.actions.acceptProposedMilestones = [];
+                    addActionOptions(_this.web3, st.actions.acceptProposedMilestones, [st.donor], _this.contract.address, 0, _this.contract.acceptProposedMilestones.getData(), cb1);
+                }, function (cb1) {
+                    st.actions.arbitrateCancelCampaign = [];
+                    addActionOptions(_this.web3, st.actions.arbitrateCancelCampaign, [st.arbitrator], _this.contract.address, 0, _this.contract.arbitrateCancelCampaign.getData(), cb1);
                 }], function (err) {
                     if (err) {
                         cb(err);return;
@@ -196,7 +315,7 @@ var MilestoneTracker = function () {
         key: "acceptProposedMilestones",
         value: function acceptProposedMilestones(opts, cb) {
             return (0, _runethtx.sendContractTx)(this.web3, this.contract, "acceptProposedMilestones", Object.assign({}, opts, {
-                extraGas: 1000000
+                gas: 4000000
             }), cb);
         }
     }, {
@@ -284,8 +403,8 @@ var MilestoneTracker = function () {
                             return;
                         }
 
-                        var idPayment = _lodash2.default.findIndex(vSt.payments, function (_ref) {
-                            var description = _ref.description;
+                        var idPayment = _lodash2.default.findIndex(vSt.payments, function (_ref2) {
+                            var description = _ref2.description;
                             return description === milestone.payDescription;
                         });
 
@@ -390,5 +509,62 @@ function pad(_n, width, _z) {
     var z = _z || "0";
     var n = _n.toString();
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+var multisigCodeHash = "0x11111";
+
+function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, data, cb) {
+    var accounts = void 0;
+    var authorizedUsers = normalizeAccountList(web3, _authorizedUsers);
+    _async2.default.series([function (cb1) {
+        web3.eth.getAccounts(function (err, _accounts) {
+            if (err) {
+                cb1(err);
+                return;
+            }
+            accounts = _accounts;
+            cb1();
+        });
+    }, function (cb1) {
+        var possibleAccounts = _lodash2.default.intersection(accounts, authorizedUsers);
+        _lodash2.default.each(possibleAccounts, function (account) {
+            actionOptions.push({
+                account: account,
+                type: "ACCOUNT"
+            });
+        });
+        _async2.default.each(possibleAccounts, function (account, cb2) {
+            web3.eth.getCode(account, function (err, res) {
+                if (err) {
+                    cb2(err);
+                    return;
+                }
+                var hash = web3.sha3(res, { encoding: "hex" });
+                if (hash === multisigCodeHash) {
+                    var multiSigWallet = new _multisigwallet2.default(web3, account);
+                    multiSigWallet.getActionOptions(dest, value, data, function (err2, options) {
+                        if (err2) {
+                            cb2(err);
+                            return;
+                        }
+                        actionOptions.push.apply(actionOptions, _toConsumableArray(options));
+                        cb2();
+                    });
+                } else {
+                    cb2();
+                }
+            });
+        }, cb1);
+    }], cb);
+}
+
+function normalizeAccountList(web3, accounts) {
+    var validAccounts = {};
+    _lodash2.default.each(accounts, function (account) {
+        if (web3.isAddress(account)) {
+            validAccounts[account] = true;
+        }
+    });
+    return _lodash2.default.keys(validAccounts);
 }
 module.exports = exports["default"];

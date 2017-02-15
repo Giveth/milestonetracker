@@ -3,6 +3,7 @@ import _ from "lodash";
 import rlp from "rlp";
 import BigNumber from "bignumber.js";
 import Vault from "vaultcontract";
+import MultiSigWallet from "multisigwallet";
 import { deploy, sendContractTx, asyncfunc } from "runethtx";
 import { MilestoneTrackerAbi, MilestoneTrackerByteCode } from "../contracts/MilestoneTracker.sol.js";
 
@@ -56,31 +57,199 @@ export default class MilestoneTracker {
                 },
                 (cb1) => {
                     async.eachSeries(_.range(0, nMilestones), (idMilestone, cb2) => {
-                        this.contract.milestones(idMilestone, (err, res) => {
-                            if (err) { cb2(err); return; }
-                            const milestoneStatus = [
-                                "AcceptedAndInProgress",
-                                "Completed",
-                                "AuthorizedForPayment",
-                                "Canceled",
-                            ];
-                            const m = {
-                                description: res[ 0 ],
-                                url: res[ 1 ],
-                                minCompletionDate: res[ 2 ].toNumber(),
-                                maxCompletionDate: res[ 3 ].toNumber(),
-                                milestoneLeadLink: res[ 4 ],
-                                reviewer: res[ 5 ],
-                                reviewTime: res[ 6 ].toNumber(),
-                                paymentSource: res[ 7 ],
-                                payData: res[ 8 ],
-                                status: milestoneStatus[ res[ 9 ].toNumber() ],
-                                doneTime: res[ 10 ].toNumber(),
-                            };
-                            Object.assign(m, decodePayData(m.payData));
-                            st.milestones.push(m);
-                            cb2();
-                        });
+                        let milestone;
+                        async.series([
+                            (cb3) => {
+                                this.contract.milestones(idMilestone, (err, res) => {
+                                    if (err) { cb3(err); return; }
+                                    const milestoneStatus = [
+                                        "AcceptedAndInProgress",
+                                        "Completed",
+                                        "AuthorizedForPayment",
+                                        "Canceled",
+                                    ];
+                                    milestone = {
+                                        description: res[ 0 ],
+                                        url: res[ 1 ],
+                                        minCompletionDate: res[ 2 ].toNumber(),
+                                        maxCompletionDate: res[ 3 ].toNumber(),
+                                        milestoneLeadLink: res[ 4 ],
+                                        reviewer: res[ 5 ],
+                                        reviewTime: res[ 6 ].toNumber(),
+                                        paymentSource: res[ 7 ],
+                                        payData: res[ 8 ],
+                                        status: milestoneStatus[ res[ 9 ].toNumber() ],
+                                        doneTime: res[ 10 ].toNumber(),
+                                    };
+                                    Object.assign(milestone, decodePayData(milestone.payData));
+                                    st.milestones.push(milestone);
+                                    cb3();
+                                });
+                            },
+                            (cb3) => {
+                                if ((milestone.status !== "AuthorizedForPayment") ||
+                                    (!milestone.payRecipient)) {
+                                    cb3();
+                                    return;
+                                }
+                                const vault = new Vault(this.web3, milestone.paymentSource);
+                                vault.getState((err, vSt) => {
+                                    if (err) {
+                                        cb3(err);
+                                        return;
+                                    }
+
+                                    milestone.paymentInfo = _.find(vSt.payments,
+                                        ({ description }) =>
+                                            (description === milestone.payDescription));
+
+                                    cb3();
+                                });
+                            },
+                            (cb3) => {
+                                milestone.actions = {};
+
+                                const now = Math.floor(new Date().getTime() / 1000);
+                                if ((milestone.status !== "AcceptedAndInProgress") ||
+                                    (now < milestone.minCompletionDate) ||
+                                    (now > milestone.maxCompletionDate)) {
+                                    cb3();
+                                    return;
+                                }
+
+                                milestone.actions.markMilestoneComplete = [];
+                                addActionOptions(
+                                    this.web3,
+                                    milestone.actions.markMilestoneComplete,
+                                    [
+                                        milestone.milestoneLeadLink,
+                                        st.recipient,
+                                    ],
+                                    this.contract.address,
+                                    0,
+                                    this.contract.markMilestoneComplete.getData(idMilestone),
+                                    cb3);
+                            },
+                            (cb3) => {
+                                if (milestone.status !== "Completed") {
+                                    cb3();
+                                    return;
+                                }
+
+                                milestone.actions.approveCompletedMilestone = [];
+                                addActionOptions(
+                                    this.web3,
+                                    milestone.actions.approveCompletedMilestone,
+                                    [
+                                        milestone.reviewer,
+                                    ],
+                                    this.contract.address,
+                                    0,
+                                    this.contract.approveCompletedMilestone.getData(idMilestone),
+                                    cb3);
+                            },
+                            (cb3) => {
+                                if (milestone.status !== "Completed") {
+                                    cb3();
+                                    return;
+                                }
+
+                                milestone.actions.rejectMilestone = [];
+                                addActionOptions(
+                                    this.web3,
+                                    milestone.actions.rejectMilestone,
+                                    [
+                                        milestone.reviewer,
+                                    ],
+                                    this.contract.address,
+                                    0,
+                                    this.contract.rejectMilestone.getData(idMilestone),
+                                    cb3);
+                            },
+                            (cb3) => {
+                                const now = Math.floor(new Date().getTime() / 1000);
+                                if ((milestone.status !== "Completed") ||
+                                    (now < milestone.doneTime + milestone.reviewTime)) {
+                                    cb3();
+                                    return;
+                                }
+
+                                milestone.actions.requestMilestonePayment = [];
+                                addActionOptions(
+                                    this.web3,
+                                    milestone.actions.requestMilestonePayment,
+                                    [
+                                        milestone.milestoneLeadLink,
+                                        st.recipient,
+                                    ],
+                                    this.contract.address,
+                                    0,
+                                    this.contract.requestMilestonePayment.getData(idMilestone),
+                                    cb3);
+                            },
+                            (cb3) => {
+                                if ((milestone.status !== "AcceptedAndInProgress") &&
+                                    (milestone.status !== "Completed")) {
+                                    cb3();
+                                    return;
+                                }
+
+                                milestone.actions.cancelMilestone = [];
+                                addActionOptions(
+                                    this.web3,
+                                    milestone.actions.cancelMilestone,
+                                    [
+                                        st.recipient,
+                                    ],
+                                    this.contract.address,
+                                    0,
+                                    this.contract.cancelMilestone.getData(idMilestone),
+                                    cb3);
+                            },
+                            (cb3) => {
+                                if ((milestone.status !== "AcceptedAndInProgress") &&
+                                    (milestone.status !== "Completed")) {
+                                    cb3();
+                                    return;
+                                }
+
+                                milestone.actions.arbitrateApproveMilestone = [];
+                                addActionOptions(
+                                    this.web3,
+                                    milestone.actions.arbitrateApproveMilestone,
+                                    [
+                                        st.arbitrator,
+                                    ],
+                                    this.contract.address,
+                                    0,
+                                    this.contract.arbitrateApproveMilestone.getData(idMilestone),
+                                    cb3);
+                            },
+                            (cb3) => {
+                                const now = Math.floor(new Date().getTime() / 1000);
+                                if ((milestone.status !== "AuthorizedForPayment") ||
+                                    (milestone.paymentInfo.paid) ||
+                                    (now < milestone.paymentInfo.earliestPayTime)) {
+                                    cb3();
+                                    return;
+                                }
+
+                                const vault = new Vault(this.web3, milestone.paymentSource);
+
+                                milestone.actions.collectMilestone = [];
+                                addActionOptions(
+                                    this.web3,
+                                    milestone.actions.collectMilestone,
+                                    [
+                                        milestone.payRecipient,
+                                    ],
+                                    milestone.paymentSource,
+                                    0,
+                                    vault.contract.collectAuthorizedPayment.getData(
+                                        milestone.paymentInfo.idPayment),
+                                    cb3);
+                            },
+                        ], cb2);
                     }, cb1);
                 },
                 (cb1) => {
@@ -105,6 +274,74 @@ export default class MilestoneTracker {
                         st.proposedMilestones = MilestoneTracker.bytes2milestones(res);
                         cb1();
                     });
+                },
+                (cb1) => {
+                    st.actions = {};
+                    if (st.changingMilestones) {
+                        cb1();
+                        return;
+                    }
+
+                    st.actions.proposeMilestones = [];
+                    addActionOptions(
+                        this.web3,
+                        st.actions.proposeMilestones,
+                        [
+                            st.recipient,
+                        ],
+                        this.contract.address,
+                        0,
+                        this.contract.proposeMilestones.getData("0x10"),
+                        cb1);
+                },
+                (cb1) => {
+                    if (!st.changingMilestones) {
+                        cb1();
+                        return;
+                    }
+
+                    st.actions.unproposeMilestones = [];
+                    addActionOptions(
+                        this.web3,
+                        st.actions.unproposeMilestones,
+                        [
+                            st.recipient,
+                        ],
+                        this.contract.address,
+                        0,
+                        this.contract.unproposeMilestones.getData(),
+                        cb1);
+                },
+                (cb1) => {
+                    if (!st.changingMilestones) {
+                        cb1();
+                        return;
+                    }
+
+                    st.actions.acceptProposedMilestones = [];
+                    addActionOptions(
+                        this.web3,
+                        st.actions.acceptProposedMilestones,
+                        [
+                            st.donor,
+                        ],
+                        this.contract.address,
+                        0,
+                        this.contract.acceptProposedMilestones.getData(),
+                        cb1);
+                },
+                (cb1) => {
+                    st.actions.arbitrateCancelCampaign = [];
+                    addActionOptions(
+                        this.web3,
+                        st.actions.arbitrateCancelCampaign,
+                        [
+                            st.arbitrator,
+                        ],
+                        this.contract.address,
+                        0,
+                        this.contract.arbitrateCancelCampaign.getData(),
+                        cb1);
                 },
             ], (err) => {
                 if (err) { cb(err); return; }
@@ -218,7 +455,7 @@ export default class MilestoneTracker {
             this.contract,
             "acceptProposedMilestones",
             Object.assign({}, opts, {
-                extraGas: 1000000,
+                gas: 4000000,
             }),
             cb);
     }
@@ -404,4 +641,64 @@ function pad(_n, width, _z) {
     const z = _z || "0";
     const n = _n.toString();
     return n.length >= width ? n : new Array((width - n.length) + 1).join(z) + n;
+}
+
+const multisigCodeHash = "0x11111";
+
+function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, data, cb) {
+    let accounts;
+    const authorizedUsers = normalizeAccountList(web3, _authorizedUsers);
+    async.series([
+        (cb1) => {
+            web3.eth.getAccounts((err, _accounts) => {
+                if (err) {
+                    cb1(err);
+                    return;
+                }
+                accounts = _accounts;
+                cb1();
+            });
+        },
+        (cb1) => {
+            const possibleAccounts = _.intersection(accounts, authorizedUsers);
+            _.each(possibleAccounts, (account) => {
+                actionOptions.push({
+                    account,
+                    type: "ACCOUNT",
+                });
+            });
+            async.each(possibleAccounts, (account, cb2) => {
+                web3.eth.getCode(account, (err, res) => {
+                    if (err) {
+                        cb2(err);
+                        return;
+                    }
+                    const hash = web3.sha3(res, { encoding: "hex" });
+                    if (hash === multisigCodeHash) {
+                        const multiSigWallet = new MultiSigWallet(web3, account);
+                        multiSigWallet.getActionOptions(dest, value, data, (err2, options) => {
+                            if (err2) {
+                                cb2(err);
+                                return;
+                            }
+                            actionOptions.push(...options);
+                            cb2();
+                        });
+                    } else {
+                        cb2();
+                    }
+                });
+            }, cb1);
+        },
+    ], cb);
+}
+
+function normalizeAccountList(web3, accounts) {
+    const validAccounts = {};
+    _.each(accounts, (account) => {
+        if (web3.isAddress(account)) {
+            validAccounts[ account ] = true;
+        }
+    });
+    return _.keys(validAccounts);
 }
