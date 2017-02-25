@@ -676,14 +676,7 @@ function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, da
                     const hash = web3.sha3(res, { encoding: "hex" });
                     if (hash === multisigCodeHash) {
                         const multiSigWallet = new MultiSigWallet(web3, account);
-                        multiSigWallet.getActionOptions(dest, value, data, (err2, options) => {
-                            if (err2) {
-                                cb2(err);
-                                return;
-                            }
-                            actionOptions.push(...options);
-                            cb2();
-                        });
+                        multiSigWallet.addActionOptions(actionOptions, dest, value, data, cb2);
                     } else {
                         cb2();
                     }
