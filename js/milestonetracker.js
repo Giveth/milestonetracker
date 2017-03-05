@@ -667,7 +667,7 @@ function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, da
                     type: "ACCOUNT",
                 });
             });
-            async.each(possibleAccounts, (account, cb2) => {
+            async.each(authorizedUsers, (account, cb2) => {
                 web3.eth.getCode(account, (err, res) => {
                     if (err) {
                         cb2(err);
