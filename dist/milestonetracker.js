@@ -38,8 +38,6 @@ var _MilestoneTrackerSol = require("../contracts/MilestoneTracker.sol.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var MilestoneTracker = function () {
@@ -258,7 +256,7 @@ var MilestoneTracker = function () {
                     }
 
                     st.actions.acceptProposedMilestones = [];
-                    addActionOptions(_this.web3, st.actions.acceptProposedMilestones, [st.donor], _this.contract.address, 0, _this.contract.acceptProposedMilestones.getData(), cb1);
+                    addActionOptions(_this.web3, st.actions.acceptProposedMilestones, [st.donor], _this.contract.address, 0, _this.contract.acceptProposedMilestones.getData(st.proposedMilestonesHash), cb1);
                 }, function (cb1) {
                     st.actions.arbitrateCancelCampaign = [];
                     addActionOptions(_this.web3, st.actions.arbitrateCancelCampaign, [st.arbitrator], _this.contract.address, 0, _this.contract.arbitrateCancelCampaign.getData(), cb1);
@@ -542,14 +540,7 @@ function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, da
                 var hash = web3.sha3(res, { encoding: "hex" });
                 if (hash === multisigCodeHash) {
                     var multiSigWallet = new _multisigwallet2.default(web3, account);
-                    multiSigWallet.getActionOptions(dest, value, data, function (err2, options) {
-                        if (err2) {
-                            cb2(err);
-                            return;
-                        }
-                        actionOptions.push.apply(actionOptions, _toConsumableArray(options));
-                        cb2();
-                    });
+                    multiSigWallet.addActionOptions(actionOptions, dest, value, data, cb2);
                 } else {
                     cb2();
                 }

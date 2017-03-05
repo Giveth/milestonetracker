@@ -327,7 +327,7 @@ export default class MilestoneTracker {
                         ],
                         this.contract.address,
                         0,
-                        this.contract.acceptProposedMilestones.getData(),
+                        this.contract.acceptProposedMilestones.getData(st.proposedMilestonesHash),
                         cb1);
                 },
                 (cb1) => {
