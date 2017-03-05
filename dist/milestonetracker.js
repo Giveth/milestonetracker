@@ -538,7 +538,7 @@ function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, da
                     return;
                 }
                 var hash = web3.sha3(res, { encoding: "hex" });
-                if (hash === multisigCodeHash) {
+                if (res.length > 3) {
                     var multiSigWallet = new _multisigwallet2.default(web3, account);
                     multiSigWallet.addActionOptions(actionOptions, dest, value, data, cb2);
                 } else {
