@@ -673,6 +673,12 @@ function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, da
                         cb2(err);
                         return;
                     }
+
+// We need to check that this is a multisig contract.
+// We asume that if it is a contract, it's going to be a multisig.
+// In future versions of solidity, it should be possible to check
+// The implemented interfaces of a contract and here would be
+// the appropiate check.
                     const hash = web3.sha3(res, { encoding: "hex" });
                     if (res.length > 3) {
                         const multiSigWallet = new MultiSigWallet(web3, account);
