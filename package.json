@@ -1,6 +1,6 @@
 {
   "name": "milestonetracker",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "description": "Milestone Tracker contract",
   "main": "dist/milestonetracker.js",
   "directories": {

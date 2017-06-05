@@ -196,7 +196,7 @@ var MilestoneTracker = function () {
                             addActionOptions(_this.web3, milestone.actions.arbitrateApproveMilestone, [st.arbitrator], _this.contract.address, 0, _this.contract.arbitrateApproveMilestone.getData(idMilestone), cb3);
                         }, function (cb3) {
                             var now = Math.floor(new Date().getTime() / 1000);
-                            if (milestone.status !== "AuthorizedForPayment" || milestone.paymentInfo.paid || now < milestone.paymentInfo.earliestPayTime) {
+                            if (milestone.status !== "AuthorizedForPayment" || !milestone.paymentInfo || milestone.paymentInfo.paid || now < milestone.paymentInfo.earliestPayTime) {
                                 cb3();
                                 return;
                             }
@@ -537,6 +537,12 @@ function addActionOptions(web3, actionOptions, _authorizedUsers, dest, value, da
                     cb2(err);
                     return;
                 }
+
+                // We need to check that this is a multisig contract.
+                // We asume that if it is a contract, it's going to be a multisig.
+                // In future versions of solidity, it should be possible to check
+                // The implemented interfaces of a contract and here would be
+                // the appropiate check.
                 var hash = web3.sha3(res, { encoding: "hex" });
                 if (res.length > 3) {
                     var multiSigWallet = new _multisigwallet2.default(web3, account);

@@ -228,6 +228,7 @@ export default class MilestoneTracker {
                             (cb3) => {
                                 const now = Math.floor(new Date().getTime() / 1000);
                                 if ((milestone.status !== "AuthorizedForPayment") ||
+                                    (!milestone.paymentInfo) ||
                                     (milestone.paymentInfo.paid) ||
                                     (now < milestone.paymentInfo.earliestPayTime)) {
                                     cb3();
