@@ -400,9 +400,12 @@ export default class MilestoneTracker {
                 data = milestone.payData;
             } else {
                 const vault = new Vault(self.web3, milestone.paymentSource);
+                let ref = new BigNumber(idx).toString(16);
+                while (ref.length < 64) ref = "0" + ref;
+                ref = "0x" + ref;
                 data = vault.contract.authorizePayment.getData(
                             milestone.payDescription,
-                            idx,
+                            ref,
                             milestone.payRecipient,
                             milestone.payValue,
                             milestone.payDelay || 0,
@@ -584,7 +587,7 @@ export default class MilestoneTracker {
                     }
 
                     const idPayment = _.findIndex(vSt.payments,
-                        ({ description }) => (description === milestone.payDescription));
+                        ({ name }) => (name === milestone.payDescription));
 
                     if (typeof idPayment !== "number") {
                         cb(new Error("Payment not found"));
@@ -610,11 +613,12 @@ function decodePayData(payData) {
     const res = {};
     const func = payData.substr(2, 8).toLowerCase();
     // Authorize Payment
-    if (func === "8e637a33") {
+    if (func === "20ea2533") {
         res.payDescription = extractString(payData, 0);
-        res.payRecipient = extractAddress(payData, 1);
-        res.payValue = new BigNumber(extractUInt(payData, 2));
-        res.payDelay = extractUInt(payData, 3).toNumber();
+        res.payReference = extractUInt(payData, 1);
+        res.payRecipient = extractAddress(payData, 2);
+        res.payValue = new BigNumber(extractUInt(payData, 3));
+        res.payDelay = extractUInt(payData, 4).toNumber();
     }
     return res;
 }

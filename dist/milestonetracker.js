@@ -283,7 +283,11 @@ var MilestoneTracker = function () {
                     data = milestone.payData;
                 } else {
                     var vault = new _vaultcontract2.default(self.web3, milestone.paymentSource);
-                    data = vault.contract.authorizePayment.getData(milestone.payDescription, idx, milestone.payRecipient, milestone.payValue, milestone.payDelay || 0, { from: self.contract.address });
+                    var ref = new _bignumber2.default(idx).toString(16);
+                    while (ref.length < 64) {
+                        ref = "0" + ref;
+                    }ref = "0x" + ref;
+                    data = vault.contract.authorizePayment.getData(milestone.payDescription, ref, milestone.payRecipient, milestone.payValue, milestone.payDelay || 0, { from: self.contract.address });
                 }
 
                 return [new Buffer(milestone.description), new Buffer(milestone.url), n2buff(milestone.minCompletionDate), n2buff(milestone.maxCompletionDate), milestone.milestoneLeadLink, milestone.reviewer, n2buff(milestone.reviewTime), milestone.paymentSource, data];
@@ -412,7 +416,7 @@ var MilestoneTracker = function () {
 
                         vault.collectAuthorizedPayment({
                             idPayment: idPayment,
-                            from: vSt.payments[idPayment].recipient
+                            from: vSt.payments[idPayment].payRecipient
                         }, function (err3, txHash) {
                             if (err3) {
                                 cb(err3);
@@ -474,11 +478,12 @@ function decodePayData(payData) {
     var res = {};
     var func = payData.substr(2, 8).toLowerCase();
     // Authorize Payment
-    if (func === "8e637a33") {
+    if (func === "20ea2533") {
         res.payDescription = extractString(payData, 0);
-        res.payRecipient = extractAddress(payData, 1);
-        res.payValue = new _bignumber2.default(extractUInt(payData, 2));
-        res.payDelay = extractUInt(payData, 3).toNumber();
+        res.payReference = extractUInt(payData, 1);
+        res.payRecipient = extractAddress(payData, 2);
+        res.payValue = new _bignumber2.default(extractUInt(payData, 3));
+        res.payDelay = extractUInt(payData, 4).toNumber();
     }
     return res;
 }
