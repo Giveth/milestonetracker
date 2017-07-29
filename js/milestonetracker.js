@@ -394,7 +394,7 @@ export default class MilestoneTracker {
             if (S.length % 2 === 1) S = "0" + S;
             return new Buffer(S, "hex");
         }
-        const d = _.map(milestones, (milestone) => {
+        const d = _.map(milestones, (milestone, idx) => {
             let data;
             if (milestone.payData) {
                 data = milestone.payData;
@@ -402,6 +402,7 @@ export default class MilestoneTracker {
                 const vault = new Vault(self.web3, milestone.paymentSource);
                 data = vault.contract.authorizePayment.getData(
                             milestone.payDescription,
+                            idx,
                             milestone.payRecipient,
                             milestone.payValue,
                             milestone.payDelay || 0,

@@ -277,13 +277,13 @@ var MilestoneTracker = function () {
                 if (S.length % 2 === 1) S = "0" + S;
                 return new Buffer(S, "hex");
             }
-            var d = _lodash2.default.map(milestones, function (milestone) {
+            var d = _lodash2.default.map(milestones, function (milestone, idx) {
                 var data = void 0;
                 if (milestone.payData) {
                     data = milestone.payData;
                 } else {
                     var vault = new _vaultcontract2.default(self.web3, milestone.paymentSource);
-                    data = vault.contract.authorizePayment.getData(milestone.payDescription, milestone.payRecipient, milestone.payValue, milestone.payDelay || 0, { from: self.contract.address });
+                    data = vault.contract.authorizePayment.getData(milestone.payDescription, idx, milestone.payRecipient, milestone.payValue, milestone.payDelay || 0, { from: self.contract.address });
                 }
 
                 return [new Buffer(milestone.description), new Buffer(milestone.url), n2buff(milestone.minCompletionDate), n2buff(milestone.maxCompletionDate), milestone.milestoneLeadLink, milestone.reviewer, n2buff(milestone.reviewTime), milestone.paymentSource, data];
