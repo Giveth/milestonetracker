@@ -136,8 +136,8 @@ var MilestoneTracker = function () {
                                 }
 
                                 milestone.paymentInfo = _lodash2.default.find(vSt.payments, function (_ref) {
-                                    var description = _ref.description;
-                                    return description === milestone.payDescription;
+                                    var name = _ref.name;
+                                    return name === milestone.payDescription;
                                 });
 
                                 cb3();
@@ -406,8 +406,8 @@ var MilestoneTracker = function () {
                         }
 
                         var idPayment = _lodash2.default.findIndex(vSt.payments, function (_ref2) {
-                            var description = _ref2.description;
-                            return description === milestone.payDescription;
+                            var name = _ref2.name;
+                            return name === milestone.payDescription;
                         });
 
                         if (typeof idPayment !== "number") {
@@ -416,7 +416,7 @@ var MilestoneTracker = function () {
 
                         vault.collectAuthorizedPayment({
                             idPayment: idPayment,
-                            from: vSt.payments[idPayment].payRecipient
+                            from: vSt.payments[idPayment].recipient
                         }, function (err3, txHash) {
                             if (err3) {
                                 cb(err3);
