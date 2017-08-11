@@ -100,8 +100,8 @@ export default class MilestoneTracker {
                                     }
 
                                     milestone.paymentInfo = _.find(vSt.payments,
-                                        ({ description }) =>
-                                            (description === milestone.payDescription));
+                                        ({ name }) =>
+                                            (name === milestone.payDescription));
 
                                     cb3();
                                 });
