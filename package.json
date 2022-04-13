@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/Giveth/milestonetracker",
   "dependencies": {
-    "async": "^2.1.4",
+    "async": "^3.2.2",
     "bignumber.js": "^4.0.0",
     "lodash": "^4.17.4",
     "multisigwallet": "0.0.3",
